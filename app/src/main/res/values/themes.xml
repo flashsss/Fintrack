@@ -1,0 +1,4 @@
+<resources>
+    <!-- Window theme only; in-app styling comes from the Compose Material 3 theme. -->
+    <style name="Theme.FinTrack" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>
