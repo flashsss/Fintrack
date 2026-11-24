@@ -204,6 +204,9 @@ negative (for example, credit card debt).
 - Room, DAO and repository behavior: Robolectric unit tests against a real in-memory Room
   database (`app/src/test/.../data`). The build environment has no emulator, so
   instrumented tests on a device are not part of the verified suite yet.
+- `MigrationTestHelper` reads `app/schemas` as assets. Robolectric only sees the tested
+  variant's merged assets, so the schemas are added to the `debug` source set's assets
+  (debug APK only; release builds do not contain them).
 - Every balance-affecting operation has a test, including edits and deletes of each
   transaction type and protection against duplicate effects.
 - A task is not complete until its tests pass.

@@ -46,6 +46,15 @@ android {
     testOptions {
         unitTests.isIncludeAndroidResources = true
     }
+
+    sourceSets {
+        // MigrationTestHelper reads exported schemas from assets. Robolectric unit tests only
+        // see the merged assets of the tested variant, so the schemas are added to the debug
+        // variant. Release builds do not contain them.
+        getByName("debug") {
+            assets.directories.add("$projectDir/schemas")
+        }
+    }
 }
 
 kotlin {
