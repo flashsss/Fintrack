@@ -72,6 +72,7 @@ class SqliteCompatibilityTest {
     @Test
     fun `analytics queries run on SQLite 3_21`() {
         assertEquals(0, run(AnalyticsSql.EXPENSE_BY_CATEGORY_AND_DAY))
+        assertEquals(0, run(AnalyticsSql.EXPENSE_BY_WEEKDAY))
     }
 
     @Test

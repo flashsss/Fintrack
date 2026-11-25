@@ -105,6 +105,24 @@
     <string name="insight_reason_no_eligible_category">Belum cukup data: belum ada kategori dengan pengeluaran sebelumnya minimal Rp100.000 dan minimal 3 transaksi sekarang.</string>
     <string name="insight_reason_no_current_income">Belum cukup data: tidak ada pemasukan pada periode ini.</string>
     <string name="insight_reason_low_previous_income">Belum cukup data: pemasukan periode sebelumnya kurang dari Rp1.000.000.</string>
+    <string name="insight_i2_text_higher">Rata-rata pengeluaran harian akhir pekan cenderung %1$s× hari kerja (%2$s vs %3$s per hari).</string>
+    <string name="insight_i2_text_lower">Rata-rata pengeluaran harian akhir pekan cenderung lebih rendah: %1$s× hari kerja (%2$s vs %3$s per hari).</string>
+    <string name="insight_i2_rule">Akhir pekan vs hari kerja: selisih minimal 1,5×; minimal 4 hari akhir pekan, 10 hari kerja, dan 20 transaksi pengeluaran.</string>
+    <string name="insight_reason_short_period">Belum cukup data: periode terlalu pendek (minimal 4 hari akhir pekan dan 10 hari kerja).</string>
+    <string name="insight_reason_few_expenses">Belum cukup data: kurang dari 20 transaksi pengeluaran.</string>
+    <string name="insight_reason_one_sided">Belum cukup data: pengeluaran hanya terjadi di hari kerja atau hanya di akhir pekan.</string>
+    <string name="analysis_tab_pattern">Pola</string>
+    <string name="pattern_weekday_title">Pengeluaran per hari dalam minggu</string>
+    <string name="pattern_weekday_note">Rata-rata per hari = total pengeluaran hari itu dibagi jumlah hari tersebut dalam rentang, termasuk yang tanpa transaksi.</string>
+    <plurals name="pattern_weekday_detail">
+        <item quantity="one">%1$s per hari · %2$d transaksi · %3$d hari</item>
+        <item quantity="other">%1$s per hari · %2$d transaksi · %3$d hari</item>
+    </plurals>
+    <string name="pattern_weekend_vs_weekday">Akhir pekan vs hari kerja</string>
+    <string name="pattern_weekend">Akhir pekan (Sabtu–Minggu)</string>
+    <string name="pattern_weekday">Hari kerja (Senin–Jumat)</string>
+    <string name="pattern_per_day">%1$s per hari</string>
+    <string name="pattern_empty">Belum ada pengeluaran pada rentang ini.</string>
     <string name="analysis_tab_trend">Tren</string>
     <string name="analysis_tab_category">Kategori</string>
     <string name="analysis_category_view_flat">Per kategori</string>

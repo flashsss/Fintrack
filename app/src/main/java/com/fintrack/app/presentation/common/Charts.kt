@@ -1,6 +1,7 @@
 package com.fintrack.app.presentation.common
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -106,4 +107,17 @@ fun LegendItem(color: Color, label: String, value: String) {
 @Composable
 fun ColorDot(color: Color) {
     Canvas(Modifier.size(10.dp)) { drawCircle(color) }
+}
+
+/** Horizontal bar whose filled width is [percent] of the row (0..100). It encodes a value; not decoration. */
+@Composable
+fun ProportionBar(percent: Double, color: Color = LocalChartColors.current.expense) {
+    androidx.compose.foundation.layout.Box(
+        Modifier.fillMaxWidth().padding(top = 4.dp).height(6.dp)
+            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(3.dp)),
+    ) {
+        androidx.compose.foundation.layout.Box(
+            Modifier.fillMaxWidth((percent / 100).toFloat().coerceIn(0f, 1f)).height(6.dp).background(color, RoundedCornerShape(3.dp)),
+        )
+    }
 }

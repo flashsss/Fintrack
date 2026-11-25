@@ -52,4 +52,10 @@ class ReportQueryPlanTest {
         val plan = plan(AnalyticsSql.EXPENSE_BY_CATEGORY_AND_DAY, 0L, 86_400_000L, 10L) // start, dayMillis, end
         assertTrue(plan, plan.contains("index_transactions_type_transactionDate"))
     }
+
+    @Test
+    fun `weekday totals use the type and date index`() {
+        val plan = plan(AnalyticsSql.EXPENSE_BY_WEEKDAY, 0L, 86_400_000L, 3, 10L) // start, dayMillis, startWeekday, end
+        assertTrue(plan, plan.contains("index_transactions_type_transactionDate"))
+    }
 }

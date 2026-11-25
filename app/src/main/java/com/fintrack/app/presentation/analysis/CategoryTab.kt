@@ -41,6 +41,7 @@ import com.fintrack.app.core.util.formatRupiahSigned
 import com.fintrack.app.presentation.common.ArchivedLabel
 import com.fintrack.app.presentation.common.MoneyText
 import com.fintrack.app.presentation.common.NoteText
+import com.fintrack.app.presentation.common.ProportionBar
 import com.fintrack.app.presentation.common.Spacing
 import com.fintrack.app.presentation.common.categoryLabel
 
@@ -155,27 +156,13 @@ private fun CategoryRow(
                 Text(formatPercent(share), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
-        ShareBar(share)
+        ProportionBar(share)
         if (change != null) {
             val percent = change.percent(CategoryAnalysis.PERCENT_BASELINE)
             val text = formatRupiahSigned(change.absolute) + (percent?.let { " (${formatPercent(it, signed = true)})" } ?: "")
             NoteText(text)
         }
         note?.let { NoteText(it) }
-    }
-}
-
-/** Proportional bar: width = share of the period's expense. Not decorative; it encodes the value. */
-@Composable
-private fun ShareBar(sharePercent: Double) {
-    Box(
-        Modifier.fillMaxWidth().padding(top = 4.dp).height(6.dp)
-            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(3.dp)),
-    ) {
-        Box(
-            Modifier.fillMaxWidth((sharePercent / 100).toFloat().coerceIn(0f, 1f)).height(6.dp)
-                .background(LocalChartColors.current.expense, RoundedCornerShape(3.dp)),
-        )
     }
 }
 
@@ -191,7 +178,7 @@ private fun MonthlyTrend(report: CategoryReport) {
         val partial = index == report.selectedMonthly.lastIndex && report.lastMonthIsPartial || index == 0 && report.reported.first.dayOfMonth != 1
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
             Text(JakartaTime.formatMonthShort(month.atDay(1)) + if (partial) "*" else "", Modifier.padding(end = 4.dp), style = MaterialTheme.typography.bodyMedium)
-            Box(Modifier.weight(1f)) { ShareBar(amount * 100.0 / max) }
+            Box(Modifier.weight(1f)) { ProportionBar(amount * 100.0 / max) }
             MoneyText(formatRupiah(amount), style = MaterialTheme.typography.bodyMedium)
         }
     }

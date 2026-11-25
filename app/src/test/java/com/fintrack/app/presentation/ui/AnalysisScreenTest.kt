@@ -142,4 +142,14 @@ class AnalysisScreenTest {
         waitForText("Belum cukup data: belum ada kategori")
         waitForText("Belum cukup data: pemasukan periode sebelumnya kurang dari Rp1.000.000.")
     }
+
+    @Test
+    fun `pattern tab shows weekdays normalized by occurrences`() {
+        seed()
+        show()
+        compose.onNodeWithText("Pola").performClick()
+        waitForText("Pengeluaran per hari dalam minggu")
+        waitForText("Kamis") // 15 Oct 2026
+        waitForText("Akhir pekan vs hari kerja")
+    }
 }

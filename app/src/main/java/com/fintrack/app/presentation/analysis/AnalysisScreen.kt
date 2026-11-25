@@ -63,6 +63,7 @@ fun AnalysisScreen(viewModel: AnalysisViewModel = hiltViewModel()) {
                 is TabContent.Trend -> TrendTab(content.report, viewModel::onGranularityChange)
                 is TabContent.Categories -> CategoryTab(content.report, viewModel::onCategorySelected)
                 is TabContent.Insights -> InsightsTab(content.report)
+                is TabContent.Pattern -> PatternTab(content.report)
             }
         }
     }
@@ -73,6 +74,7 @@ private val AnalysisTab.labelRes: Int
         AnalysisTab.INSIGHTS -> R.string.analysis_tab_insights
         AnalysisTab.TREND -> R.string.analysis_tab_trend
         AnalysisTab.CATEGORY -> R.string.analysis_tab_category
+        AnalysisTab.PATTERN -> R.string.analysis_tab_pattern
     }
 
 @Composable

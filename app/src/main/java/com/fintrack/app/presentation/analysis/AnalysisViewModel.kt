@@ -21,6 +21,7 @@ import com.fintrack.app.analytics.metrics.CategoryChange
 import com.fintrack.app.analytics.metrics.CategoryTotal
 import com.fintrack.app.analytics.metrics.OutsideHierarchy
 import com.fintrack.app.analytics.metrics.ParentNode
+import com.fintrack.app.analytics.metrics.WeekdayPattern
 import java.time.YearMonth
 import com.fintrack.app.analytics.insights.Insight
 import com.fintrack.app.analytics.insights.InsightRules
@@ -41,7 +42,7 @@ import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 /** Tabs in display order. Entries are added only when their sub-phase is implemented. */
-enum class AnalysisTab { INSIGHTS, TREND, CATEGORY }
+enum class AnalysisTab { INSIGHTS, TREND, CATEGORY, PATTERN }
 
 sealed interface TabContent {
     data object Loading : TabContent
@@ -55,7 +56,10 @@ sealed interface TabContent {
     data class Trend(val report: TrendReport) : TabContent
     data class Categories(val report: CategoryReport) : TabContent
     data class Insights(val report: InsightReport) : TabContent
+    data class Pattern(val report: PatternReport) : TabContent
 }
+
+data class PatternReport(val reported: DateSpan, val weekdays: WeekdayPattern)
 
 /** Outcomes of every insight rule for the reported span vs its fair previous span. */
 data class InsightReport(
@@ -63,6 +67,7 @@ data class InsightReport(
     val previous: DateSpan,
     val categoryIncreases: RuleOutcome<List<Insight.CategoryIncrease>>,
     val savingRateDrop: RuleOutcome<Insight.SavingRateDrop>,
+    val weekendSpending: RuleOutcome<Insight.WeekendSpending>,
     val categoriesById: Map<String, Category>,
 )
 
@@ -150,6 +155,8 @@ class AnalysisViewModel @Inject constructor(
             AnalysisTab.TREND -> observeTrend(reported, resolved.reportedDays, previous, selection.granularity)
             AnalysisTab.CATEGORY -> observeCategories(reported, previous, resolved.isPartial)
             AnalysisTab.INSIGHTS -> observeInsights(reported, previous)
+            AnalysisTab.PATTERN -> analyticsRepository.observeExpenseByWeekday(reported.first, reported.last)
+                .map { TabContent.Pattern(PatternReport(reported, WeekdayPattern.of(it, reported.first, reported.last))) }
         }
         return content
             .map(::state)
@@ -184,20 +191,28 @@ class AnalysisViewModel @Inject constructor(
     private fun observeInsights(reported: DateSpan, previous: DateSpan): Flow<TabContent> {
         val currentRange = JakartaTime.range(reported.first, reported.last)
         val previousRange = JakartaTime.range(previous.first, previous.last)
-        return combine(
+        val categoryOutcome = combine(
             analyticsRepository.observeExpenseByCategoryAndDay(reported.first, reported.last),
             reportRepository.observeExpenseByCategory(previousRange),
+        ) { days, previousExpenses ->
+            val previousById = previousExpenses.mapNotNull { e -> e.categoryId?.let { it to e.total } }.toMap()
+            InsightRules.categoryIncreases(CategoryAnalysis.flat(days), previousById)
+        }
+        val savingOutcome = combine(
             reportRepository.observePeriodTotals(currentRange),
             reportRepository.observePeriodTotals(previousRange),
-            categoryRepository.observeAllCategories(),
-        ) { days, previousExpenses, totals, previousTotals, categories ->
-            val previousById = previousExpenses.mapNotNull { e -> e.categoryId?.let { it to e.total } }.toMap()
+            InsightRules::savingRateDrop,
+        )
+        val weekendOutcome = analyticsRepository.observeExpenseByWeekday(reported.first, reported.last)
+            .map { InsightRules.weekendSpending(WeekdayPattern.of(it, reported.first, reported.last)) }
+        return combine(categoryOutcome, savingOutcome, weekendOutcome, categoryRepository.observeAllCategories()) { increases, saving, weekend, categories ->
             TabContent.Insights(
                 InsightReport(
                     reported = reported,
                     previous = previous,
-                    categoryIncreases = InsightRules.categoryIncreases(CategoryAnalysis.flat(days), previousById),
-                    savingRateDrop = InsightRules.savingRateDrop(totals, previousTotals),
+                    categoryIncreases = increases,
+                    savingRateDrop = saving,
+                    weekendSpending = weekend,
                     categoriesById = categories.associateBy { it.id },
                 ),
             )

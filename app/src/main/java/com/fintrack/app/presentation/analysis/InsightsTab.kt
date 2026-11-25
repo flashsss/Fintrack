@@ -43,14 +43,17 @@ internal fun InsightsTab(report: InsightReport) {
         Text(stringResource(R.string.insights_found_title), style = MaterialTheme.typography.titleMedium)
         val increases = (report.categoryIncreases as? RuleOutcome.Fired)?.value.orEmpty()
         val drop = (report.savingRateDrop as? RuleOutcome.Fired)?.value
-        if (increases.isEmpty() && drop == null) NoteText(stringResource(R.string.insights_none_found))
+        val weekend = (report.weekendSpending as? RuleOutcome.Fired)?.value
+        if (increases.isEmpty() && drop == null && weekend == null) NoteText(stringResource(R.string.insights_none_found))
         increases.forEach { insight -> CategoryIncreaseCard(insight, report) }
         drop?.let { SavingRateDropCard(it) }
+        weekend?.let { WeekendCard(it) }
 
         HorizontalDivider()
         Text(stringResource(R.string.insights_rules_title), style = MaterialTheme.typography.titleMedium)
         RuleStatus(stringResource(R.string.insight_i1_rule), report.categoryIncreases)
         RuleStatus(stringResource(R.string.insight_i5_rule), report.savingRateDrop)
+        RuleStatus(stringResource(R.string.insight_i2_rule), report.weekendSpending)
     }
 }
 
@@ -72,6 +75,20 @@ private fun SavingRateDropCard(insight: Insight.SavingRateDrop) {
             formatPercent(-insight.pointChange).removeSuffix("%"),
             formatPercent(insight.previousPercent),
             formatPercent(insight.currentPercent),
+        ),
+        basis = null,
+    )
+}
+
+@Composable
+private fun WeekendCard(insight: Insight.WeekendSpending) {
+    val ratio = java.text.DecimalFormat("0.0", java.text.DecimalFormatSymbols(java.util.Locale.forLanguageTag("id-ID"))).format(insight.ratio)
+    InsightCard(
+        text = stringResource(
+            if (insight.ratio >= 1) R.string.insight_i2_text_higher else R.string.insight_i2_text_lower,
+            ratio,
+            formatRupiah(kotlin.math.round(insight.weekendDailyAverage).toLong()),
+            formatRupiah(kotlin.math.round(insight.weekdayDailyAverage).toLong()),
         ),
         basis = null,
     )
@@ -106,4 +123,7 @@ private val Reason.messageRes: Int
         Reason.NO_ELIGIBLE_CATEGORY -> R.string.insight_reason_no_eligible_category
         Reason.NO_CURRENT_INCOME -> R.string.insight_reason_no_current_income
         Reason.LOW_PREVIOUS_INCOME -> R.string.insight_reason_low_previous_income
+        Reason.SHORT_PERIOD -> R.string.insight_reason_short_period
+        Reason.FEW_EXPENSES -> R.string.insight_reason_few_expenses
+        Reason.ONE_SIDED_SPENDING -> R.string.insight_reason_one_sided
     }
