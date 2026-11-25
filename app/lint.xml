@@ -8,4 +8,7 @@
     <issue id="NewerVersionAvailable">
         <ignore regexp="org\.xerial:sqlite-jdbc" />
     </issue>
+    <issue id="GradleDependency">
+        <ignore regexp="org\.xerial:sqlite-jdbc" />
+    </issue>
 </lint>

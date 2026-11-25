@@ -94,7 +94,10 @@
     <string name="insights_none_found">Tidak ada temuan yang memenuhi ambang pada periode ini.</string>
     <string name="insights_rules_title">Aturan yang diperiksa</string>
     <string name="insight_i1_text">Pengeluaran %1$s cenderung naik %2$s (%3$s) dibanding periode sebelumnya.</string>
-    <string name="insight_i1_basis">Dasar: %1$s sekarang (%2$d transaksi) vs %3$s sebelumnya.</string>
+    <plurals name="insight_i1_basis">
+        <item quantity="one">Dasar: %1$s sekarang (%2$d transaksi) vs %3$s sebelumnya.</item>
+        <item quantity="other">Dasar: %1$s sekarang (%2$d transaksi) vs %3$s sebelumnya.</item>
+    </plurals>
     <string name="insight_i1_rule">Kenaikan kategori: naik minimal 30%% dan Rp200.000; pengeluaran sebelumnya minimal Rp100.000; minimal 3 transaksi.</string>
     <string name="insight_i5_text">Rasio tabungan turun %1$s poin, dari %2$s menjadi %3$s.</string>
     <string name="insight_i5_rule">Penurunan rasio tabungan: turun minimal 10 poin; pemasukan periode sebelumnya minimal Rp1.000.000.</string>

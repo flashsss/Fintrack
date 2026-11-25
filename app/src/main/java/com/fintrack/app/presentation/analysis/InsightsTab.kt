@@ -13,6 +13,7 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.fintrack.app.R
 import com.fintrack.app.analytics.insights.Insight
@@ -59,7 +60,7 @@ private fun CategoryIncreaseCard(insight: Insight.CategoryIncrease, report: Insi
         ?: stringResource(R.string.analysis_category_unknown)
     InsightCard(
         text = stringResource(R.string.insight_i1_text, label, formatPercent(insight.percent), formatRupiahSigned(insight.current - insight.previous)),
-        basis = stringResource(R.string.insight_i1_basis, formatRupiah(insight.current), insight.count, formatRupiah(insight.previous)),
+        basis = pluralStringResource(R.plurals.insight_i1_basis, insight.count, formatRupiah(insight.current), insight.count, formatRupiah(insight.previous)),
     )
 }
 
