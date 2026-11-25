@@ -289,6 +289,47 @@
     <string name="category_archive_message">Kategori yang diarsipkan tidak bisa dipilih untuk transaksi baru. Transaksi lama tetap memakai kategori ini.</string>
     <string name="category_archived_notice">Kategori ini diarsipkan dan tidak bisa dipilih untuk transaksi baru.</string>
 
+    <!-- Planning -->
+    <string name="planning_title">Anggaran &amp; tujuan</string>
+    <string name="planning_description">Batas pengeluaran bulanan dan target tabungan</string>
+    <string name="budget_section">Anggaran %1$s</string>
+    <string name="budget_add">Tambah anggaran</string>
+    <string name="budget_empty">Belum ada anggaran. Tambahkan batas pengeluaran bulanan untuk semua pengeluaran atau per kategori.</string>
+    <string name="budget_all_expenses">Semua pengeluaran</string>
+    <string name="budget_spent_of">%1$s dari %2$s (%3$s)</string>
+    <string name="budget_remaining">Sisa %1$s</string>
+    <string name="budget_over">Terlampaui %1$s</string>
+    <string name="budget_level_near">Mendekati batas</string>
+    <string name="budget_level_over">Melebihi batas</string>
+    <string name="budget_note">Anggaran berlaku setiap bulan dan dihitung dari pengeluaran bulan berjalan (WIB). Anggaran kategori induk mencakup subkategorinya. Transfer tidak dihitung.</string>
+    <string name="budget_new_title">Anggaran baru</string>
+    <string name="budget_edit_title">Ubah anggaran</string>
+    <string name="budget_field_scope">Berlaku untuk</string>
+    <string name="budget_field_amount">Batas per bulan</string>
+    <string name="budget_scope_locked">Kategori anggaran tidak bisa diubah. Hapus lalu buat anggaran baru untuk kategori lain.</string>
+    <string name="budget_error_duplicate">Sudah ada anggaran untuk pilihan ini.</string>
+    <string name="budget_delete_title">Hapus anggaran?</string>
+    <string name="budget_delete_message">Anggaran ini tidak akan dipantau lagi. Transaksi tidak terpengaruh.</string>
+    <string name="goal_section">Tujuan keuangan</string>
+    <string name="goal_add">Tambah tujuan</string>
+    <string name="goal_empty">Belum ada tujuan keuangan.</string>
+    <string name="goal_progress">%1$s dari %2$s (%3$s)</string>
+    <string name="goal_achieved">Tercapai</string>
+    <string name="goal_overdue">Melewati tenggat %1$s</string>
+    <string name="goal_required">Perlu %1$s per bulan hingga %2$s</string>
+    <string name="goal_no_deadline">Tanpa tenggat</string>
+    <string name="goal_note">Jumlah terkumpul diisi manual; tidak diambil dari saldo dompet.</string>
+    <string name="goal_new_title">Tujuan baru</string>
+    <string name="goal_edit_title">Ubah tujuan</string>
+    <string name="goal_field_name">Nama tujuan</string>
+    <string name="goal_field_target">Target</string>
+    <string name="goal_field_current">Terkumpul saat ini</string>
+    <string name="goal_field_deadline">Tenggat</string>
+    <string name="goal_set_deadline">Pakai tenggat</string>
+    <string name="goal_error_target">Target harus lebih dari Rp0.</string>
+    <string name="goal_delete_title">Hapus tujuan?</string>
+    <string name="goal_delete_message">Tujuan ini akan dihapus dari daftar.</string>
+
     <!-- Settings -->
     <string name="settings_title">Pengaturan</string>
     <string name="settings_categories">Kategori</string>

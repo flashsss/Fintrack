@@ -9,6 +9,8 @@ object Routes {
     const val ARG_WALLET_ID = "walletId"
     const val ARG_CATEGORY_ID = "categoryId"
     const val ARG_TYPE = "type"
+    const val ARG_BUDGET_ID = "budgetId"
+    const val ARG_GOAL_ID = "goalId"
 
     const val HOME = "home"
     const val TRANSACTIONS = "transactions"
@@ -27,6 +29,15 @@ object Routes {
     const val CATEGORIES = "categories"
     const val CATEGORY_NEW = "category/new?$ARG_TYPE={$ARG_TYPE}"
     const val CATEGORY_EDIT = "category/{$ARG_CATEGORY_ID}/edit"
+
+    const val PLANNING = "planning"
+    const val BUDGET_NEW = "budget/new"
+    const val BUDGET_EDIT = "budget/{$ARG_BUDGET_ID}/edit"
+    const val GOAL_NEW = "goal/new"
+    const val GOAL_EDIT = "goal/{$ARG_GOAL_ID}/edit"
+
+    fun budgetEdit(id: String) = "budget/$id/edit"
+    fun goalEdit(id: String) = "goal/$id/edit"
 
     fun transactionNew(type: TransactionType? = null) =
         if (type == null) "transaction/new" else "transaction/new?$ARG_TYPE=${type.name}"

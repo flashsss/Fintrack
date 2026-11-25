@@ -34,6 +34,10 @@ import com.fintrack.app.presentation.categories.CategoryFormScreen
 import com.fintrack.app.presentation.categories.CategoryListScreen
 import com.fintrack.app.presentation.analysis.AnalysisScreen
 import com.fintrack.app.presentation.dashboard.DashboardScreen
+import com.fintrack.app.core.util.JakartaTime
+import com.fintrack.app.presentation.planning.BudgetFormScreen
+import com.fintrack.app.presentation.planning.GoalFormScreen
+import com.fintrack.app.presentation.planning.PlanningScreen
 import com.fintrack.app.presentation.settings.SettingsScreen
 import com.fintrack.app.presentation.transactions.TransactionDetailScreen
 import com.fintrack.app.presentation.transactions.TransactionFormScreen
@@ -149,7 +153,27 @@ private fun FinTrackNavHost(navController: NavHostController, modifier: Modifier
             WalletFormScreen(onBack = back, onSaved = back)
         }
 
-        composable(Routes.SETTINGS) { SettingsScreen(onOpenCategories = { navController.navigate(Routes.CATEGORIES) }) }
+        composable(Routes.SETTINGS) {
+            SettingsScreen(
+                onOpenCategories = { navController.navigate(Routes.CATEGORIES) },
+                onOpenPlanning = { navController.navigate(Routes.PLANNING) },
+            )
+        }
+        composable(Routes.PLANNING) {
+            PlanningScreen(
+                onBack = back,
+                onAddBudget = { navController.navigate(Routes.BUDGET_NEW) },
+                onEditBudget = { navController.navigate(Routes.budgetEdit(it)) },
+                onAddGoal = { navController.navigate(Routes.GOAL_NEW) },
+                onEditGoal = { navController.navigate(Routes.goalEdit(it)) },
+            )
+        }
+        composable(Routes.BUDGET_NEW) { BudgetFormScreen(onBack = back) }
+        composable(Routes.BUDGET_EDIT, arguments = listOf(idArgument(Routes.ARG_BUDGET_ID))) { BudgetFormScreen(onBack = back) }
+        composable(Routes.GOAL_NEW) { GoalFormScreen(onBack = back, today = JakartaTime.today(java.time.Clock.systemUTC())) }
+        composable(Routes.GOAL_EDIT, arguments = listOf(idArgument(Routes.ARG_GOAL_ID))) {
+            GoalFormScreen(onBack = back, today = JakartaTime.today(java.time.Clock.systemUTC()))
+        }
         composable(Routes.CATEGORIES) {
             CategoryListScreen(
                 onBack = back,
