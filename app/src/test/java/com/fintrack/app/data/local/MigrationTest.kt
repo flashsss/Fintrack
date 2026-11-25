@@ -75,9 +75,34 @@ class MigrationTest {
         }
     }
 
+    @Test
+    fun `migration 1 to 2 adds planning tables and preserves every financial record`() {
+        helper.createDatabase(TEST_DB, 1).use { db ->
+            db.execSQL("INSERT INTO wallets VALUES ('w1','BCA','BANK',10000000,'IDR',1,0,0,NULL,'PENDING')")
+            db.execSQL("INSERT INTO wallets VALUES ('w2','Lama','CASH',-250000,'IDR',0,0,0,NULL,'SYNCED')")
+            db.execSQL("INSERT INTO categories VALUES ('c1','Makanan','EXPENSE',NULL,NULL,NULL,1,0,0,0,NULL,'PENDING')")
+            db.execSQL("INSERT INTO transactions VALUES ('t1','w1',NULL,'c1','EXPENSE',75000,1,'Makan','Warung','MANUAL',NULL,NULL,0,0,NULL,'PENDING')")
+            db.execSQL("INSERT INTO transactions VALUES ('t2','w1','w2',NULL,'TRANSFER',100000,2,NULL,NULL,'MANUAL',NULL,NULL,0,0,5,'PENDING')")
+        }
+        helper.runMigrationsAndValidate(TEST_DB, 2, true, *FinTrackDatabase.ALL_MIGRATIONS).use { db ->
+            db.query("SELECT id, initialBalance, isActive, syncStatus FROM wallets ORDER BY id").use { c ->
+                c.moveToFirst(); assertEquals("w1", c.getString(0)); assertEquals(10_000_000L, c.getLong(1))
+                c.moveToNext(); assertEquals(-250_000L, c.getLong(1)); assertEquals(0, c.getInt(2)); assertEquals("SYNCED", c.getString(3))
+            }
+            db.query("SELECT id, amount, deletedAt, merchant FROM transactions ORDER BY id").use { c ->
+                c.moveToFirst(); assertEquals(75_000L, c.getLong(1)); assertEquals("Warung", c.getString(3))
+                c.moveToNext(); assertEquals("t2", c.getString(0)); assertEquals(5L, c.getLong(2)) // soft delete kept
+            }
+            db.query("SELECT COUNT(*) FROM budgets").use { c -> c.moveToFirst(); assertEquals(0, c.getInt(0)) }
+            // The new foreign key works against migrated categories.
+            db.execSQL("INSERT INTO budgets VALUES ('b1','c1',500000,0,0,NULL,'PENDING')")
+            db.query("PRAGMA foreign_key_check(budgets)").use { c -> assertEquals(0, c.count) }
+        }
+    }
+
     private companion object {
         const val TEST_DB = "migration-test.db"
         const val FIRST_VERSION = 1
-        const val LATEST_VERSION = 1
+        const val LATEST_VERSION = 2
     }
 }

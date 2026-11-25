@@ -8,6 +8,7 @@ import com.fintrack.app.data.local.ExpenseDistributionReader
 import com.fintrack.app.data.local.database.FinTrackDatabase
 import com.fintrack.app.data.repository.AnalyticsRepository
 import com.fintrack.app.data.repository.CategoryRepository
+import com.fintrack.app.data.repository.PlanningRepository
 import com.fintrack.app.data.repository.ReportRepository
 import com.fintrack.app.data.repository.TransactionRepository
 import com.fintrack.app.data.repository.WalletRepository
@@ -29,6 +30,7 @@ class TestDatabase {
     val categories = CategoryRepository(db, db.categoryDao(), clock)
     val transactions = TransactionRepository(db, db.transactionDao(), db.walletDao(), db.categoryDao(), clock)
     val reports = ReportRepository(db.reportDao())
+    val planning = PlanningRepository(db, db.planningDao(), db.categoryDao(), clock)
     val analytics = AnalyticsRepository(db.analyticsDao(), db, ExpenseDistributionReader(db))
 
     /** Date source without background triggers; the date comes from [clock] at collection start. */

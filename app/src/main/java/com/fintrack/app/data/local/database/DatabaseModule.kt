@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.fintrack.app.data.local.dao.AnalyticsDao
 import com.fintrack.app.data.local.dao.CategoryDao
+import com.fintrack.app.data.local.dao.PlanningDao
 import com.fintrack.app.data.local.dao.ReportDao
 import com.fintrack.app.data.local.dao.TransactionDao
 import com.fintrack.app.data.local.dao.WalletDao
@@ -39,4 +40,7 @@ object DatabaseModule {
 
     @Provides
     fun provideAnalyticsDao(database: FinTrackDatabase): AnalyticsDao = database.analyticsDao()
+
+    @Provides
+    fun providePlanningDao(database: FinTrackDatabase): PlanningDao = database.planningDao()
 }

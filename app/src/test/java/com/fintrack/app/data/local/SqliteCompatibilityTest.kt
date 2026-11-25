@@ -44,11 +44,11 @@ class SqliteCompatibilityTest {
     @Test
     fun `the exported schema is fully created`() {
         val statements = schemaStatements(File(SCHEMA).readText())
-        assertEquals(18, statements.size) // 4 tables + 14 indices in schema version 1
+        assertEquals(23, statements.size) // 6 tables + 17 indices in schema version 2
         connection.createStatement().use { s ->
             s.executeQuery("SELECT COUNT(*) FROM sqlite_master WHERE type IN ('table','index') AND name NOT LIKE 'sqlite_%'").use { r ->
                 r.next()
-                assertEquals(18, r.getInt(1))
+                assertEquals(23, r.getInt(1))
             }
         }
     }
@@ -106,6 +106,6 @@ class SqliteCompatibilityTest {
         }
 
         /** Gradle runs unit tests with the module directory as the working directory. */
-        const val SCHEMA = "schemas/com.fintrack.app.data.local.database.FinTrackDatabase/1.json"
+        const val SCHEMA = "schemas/com.fintrack.app.data.local.database.FinTrackDatabase/2.json"
     }
 }

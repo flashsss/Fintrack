@@ -4,10 +4,13 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.fintrack.app.data.local.dao.AnalyticsDao
 import com.fintrack.app.data.local.dao.CategoryDao
+import com.fintrack.app.data.local.dao.PlanningDao
 import com.fintrack.app.data.local.dao.ReportDao
 import com.fintrack.app.data.local.dao.TransactionDao
 import com.fintrack.app.data.local.dao.WalletDao
+import com.fintrack.app.data.local.entity.BudgetEntity
 import com.fintrack.app.data.local.entity.CategoryEntity
+import com.fintrack.app.data.local.entity.GoalEntity
 import com.fintrack.app.data.local.entity.SyncOutboxEntity
 import com.fintrack.app.data.local.entity.TransactionEntity
 import com.fintrack.app.data.local.entity.WalletEntity
@@ -23,8 +26,10 @@ import com.fintrack.app.data.local.entity.WalletEntity
         CategoryEntity::class,
         TransactionEntity::class,
         SyncOutboxEntity::class,
+        BudgetEntity::class,
+        GoalEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 abstract class FinTrackDatabase : RoomDatabase() {
@@ -33,11 +38,12 @@ abstract class FinTrackDatabase : RoomDatabase() {
     abstract fun transactionDao(): TransactionDao
     abstract fun reportDao(): ReportDao
     abstract fun analyticsDao(): AnalyticsDao
+    abstract fun planningDao(): PlanningDao
 
     companion object {
         const val NAME = "fintrack.db"
 
-        /** Explicit migrations, in order. Empty while the schema is at version 1. */
-        val ALL_MIGRATIONS = arrayOf<androidx.room.migration.Migration>()
+        /** Explicit migrations, in order. */
+        val ALL_MIGRATIONS = arrayOf<androidx.room.migration.Migration>(MIGRATION_1_2)
     }
 }
