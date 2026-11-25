@@ -23,6 +23,7 @@ import com.fintrack.app.analytics.metrics.OutsideHierarchy
 import com.fintrack.app.analytics.metrics.ParentNode
 import com.fintrack.app.analytics.metrics.WeekdayPattern
 import java.time.YearMonth
+import com.fintrack.app.analytics.stats.DistributionSummary
 import com.fintrack.app.analytics.insights.Insight
 import com.fintrack.app.analytics.insights.InsightRules
 import com.fintrack.app.analytics.insights.RuleOutcome
@@ -59,7 +60,7 @@ sealed interface TabContent {
     data class Pattern(val report: PatternReport) : TabContent
 }
 
-data class PatternReport(val reported: DateSpan, val weekdays: WeekdayPattern)
+data class PatternReport(val reported: DateSpan, val weekdays: WeekdayPattern, val distribution: DistributionSummary)
 
 /** Outcomes of every insight rule for the reported span vs its fair previous span. */
 data class InsightReport(
@@ -155,8 +156,12 @@ class AnalysisViewModel @Inject constructor(
             AnalysisTab.TREND -> observeTrend(reported, resolved.reportedDays, previous, selection.granularity)
             AnalysisTab.CATEGORY -> observeCategories(reported, previous, resolved.isPartial)
             AnalysisTab.INSIGHTS -> observeInsights(reported, previous)
-            AnalysisTab.PATTERN -> analyticsRepository.observeExpenseByWeekday(reported.first, reported.last)
-                .map { TabContent.Pattern(PatternReport(reported, WeekdayPattern.of(it, reported.first, reported.last))) }
+            AnalysisTab.PATTERN -> combine(
+                analyticsRepository.observeExpenseByWeekday(reported.first, reported.last),
+                analyticsRepository.observeExpenseDistribution(JakartaTime.range(reported.first, reported.last)),
+            ) { weekdays, distribution ->
+                TabContent.Pattern(PatternReport(reported, WeekdayPattern.of(weekdays, reported.first, reported.last), distribution))
+            }
         }
         return content
             .map(::state)

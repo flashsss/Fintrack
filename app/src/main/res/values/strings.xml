@@ -123,6 +123,22 @@
     <string name="pattern_weekday">Hari kerja (Senin–Jumat)</string>
     <string name="pattern_per_day">%1$s per hari</string>
     <string name="pattern_empty">Belum ada pengeluaran pada rentang ini.</string>
+    <string name="distribution_title">Distribusi nominal pengeluaran</string>
+    <string name="distribution_note">Dihitung persis dari seluruh transaksi pengeluaran pada rentang ini. Persentil memakai interpolasi linier (sama seperti PERCENTILE.INC di Excel); simpangan baku dihitung atas seluruh transaksi periode (populasi).</string>
+    <string name="distribution_empty">Belum ada pengeluaran untuk dihitung distribusinya.</string>
+    <string name="distribution_count">Jumlah transaksi</string>
+    <string name="distribution_sum">Total</string>
+    <string name="distribution_min">Terkecil</string>
+    <string name="distribution_max">Terbesar</string>
+    <string name="distribution_mean">Rata-rata</string>
+    <string name="distribution_median">Median (P50)</string>
+    <string name="distribution_percentile">P%1$d</string>
+    <string name="distribution_iqr">Rentang antarkuartil (P75 − P25)</string>
+    <string name="distribution_std_dev">Simpangan baku</string>
+    <plurals name="distribution_needs">
+        <item quantity="one">— (butuh minimal %1$d transaksi)</item>
+        <item quantity="other">— (butuh minimal %1$d transaksi)</item>
+    </plurals>
     <string name="analysis_tab_trend">Tren</string>
     <string name="analysis_tab_category">Kategori</string>
     <string name="analysis_category_view_flat">Per kategori</string>

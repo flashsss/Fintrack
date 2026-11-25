@@ -4,7 +4,12 @@ import com.fintrack.app.analytics.metrics.CategoryDayTotal
 import com.fintrack.app.analytics.metrics.WeekdayTotal
 import java.time.DayOfWeek
 import com.fintrack.app.core.util.JakartaTime
+import com.fintrack.app.analytics.stats.DistributionSummary
+import com.fintrack.app.data.local.ExpenseDistributionReader
 import com.fintrack.app.data.local.dao.AnalyticsDao
+import com.fintrack.app.data.local.database.FinTrackDatabase
+import com.fintrack.app.domain.model.DateRange
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.time.LocalDate
@@ -13,7 +18,11 @@ import javax.inject.Singleton
 
 /** Analisis aggregations. Sums are computed by SQL; see [AnalyticsDao]. */
 @Singleton
-class AnalyticsRepository @Inject constructor(private val analyticsDao: AnalyticsDao) {
+class AnalyticsRepository @Inject constructor(
+    private val analyticsDao: AnalyticsDao,
+    private val database: FinTrackDatabase,
+    private val distributionReader: ExpenseDistributionReader,
+) {
 
     /** Expense per category id and Jakarta day for [first]..[last]; requires 24-hour days. */
     fun observeExpenseByCategoryAndDay(first: LocalDate, last: LocalDate): Flow<List<CategoryDayTotal>> {
@@ -31,4 +40,13 @@ class AnalyticsRepository @Inject constructor(private val analyticsDao: Analytic
             range.start.toEpochMilli(), range.endExclusive.toEpochMilli(), JakartaTime.DAY_MILLIS, first.dayOfWeek.value - 1,
         ).map { rows -> rows.map { WeekdayTotal(DayOfWeek.of(it.weekday + 1), it.total, it.count) } }
     }
+
+    /**
+     * Exact expense distribution for the range, recomputed whenever `transactions` changes. The
+     * stream is read through [ExpenseDistributionReader]; bursts of writes are conflated.
+     */
+    fun observeExpenseDistribution(range: DateRange): Flow<DistributionSummary> =
+        database.invalidationTracker.createFlow("transactions", emitInitialState = true)
+            .conflate()
+            .map { distributionReader.read(range.start.toEpochMilli(), range.endExclusive.toEpochMilli()) }
 }

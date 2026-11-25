@@ -151,5 +151,7 @@ class AnalysisScreenTest {
         waitForText("Pengeluaran per hari dalam minggu")
         waitForText("Kamis") // 15 Oct 2026
         waitForText("Akhir pekan vs hari kerja")
+        compose.onNodeWithText("Median (P50)").performScrollTo().assertExists()
+        compose.onNodeWithText("— (butuh minimal 10 transaksi)", substring = true).performScrollTo().assertExists() // P90 with 2 expenses
     }
 }

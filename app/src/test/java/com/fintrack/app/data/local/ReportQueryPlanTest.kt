@@ -58,4 +58,11 @@ class ReportQueryPlanTest {
         val plan = plan(AnalyticsSql.EXPENSE_BY_WEEKDAY, 0L, 86_400_000L, 3, 10L) // start, dayMillis, startWeekday, end
         assertTrue(plan, plan.contains("index_transactions_type_transactionDate"))
     }
+
+    @Test
+    fun `distribution stream evaluates the count once and uses the type and date index`() {
+        val plan = plan(ExpenseDistributionReader.SQL, 0L, 10L)
+        assertTrue(plan, plan.contains("index_transactions_type_transactionDate"))
+        assertTrue("count must be an uncorrelated subquery: $plan", !plan.contains("CORRELATED"))
+    }
 }
