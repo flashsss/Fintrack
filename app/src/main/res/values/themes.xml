@@ -1,4 +1,10 @@
 <resources>
-    <!-- Window theme only; in-app styling comes from the Compose Material 3 theme. -->
-    <style name="Theme.FinTrack" parent="android:Theme.Material.Light.NoActionBar" />
+    <!--
+        Window theme only (shown before Compose draws); follows the system light/dark setting.
+        In-app styling comes from the Compose Material 3 theme.
+    -->
+    <style name="Theme.FinTrack" parent="android:Theme.DeviceDefault.DayNight">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
 </resources>

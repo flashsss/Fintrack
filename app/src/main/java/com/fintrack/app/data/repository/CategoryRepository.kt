@@ -114,6 +114,29 @@ class CategoryRepository @Inject constructor(
             WriteResult.Success(id)
         }
 
+    /** Idempotent: inserts only the default categories whose deterministic id does not exist yet. */
+    suspend fun seedDefaultCategories() {
+        val now = clock.millis()
+        categoryDao.insertIfAbsent(
+            DefaultCategories.all.map { default ->
+                CategoryEntity(
+                    id = default.id,
+                    name = default.name,
+                    type = default.type,
+                    parentId = null,
+                    icon = null,
+                    color = null,
+                    isDefault = true,
+                    isArchived = false,
+                    createdAt = now,
+                    updatedAt = now,
+                    deletedAt = null,
+                    syncStatus = SyncStatus.PENDING,
+                )
+            },
+        )
+    }
+
     private suspend fun loadParent(parentId: String): ParentCategoryRef? =
         categoryDao.getById(parentId)?.let {
             ParentCategoryRef(id = it.id, type = it.type, parentId = it.parentId, isArchived = it.isArchived)

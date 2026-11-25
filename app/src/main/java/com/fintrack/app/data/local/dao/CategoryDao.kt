@@ -15,6 +15,13 @@ interface CategoryDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(category: CategoryEntity)
 
+    /**
+     * Used only for default categories, whose ids are deterministic. An existing row (even one the
+     * user renamed or archived) is kept unchanged, which makes seeding idempotent.
+     */
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertIfAbsent(categories: List<CategoryEntity>)
+
     @Update
     suspend fun update(category: CategoryEntity)
 

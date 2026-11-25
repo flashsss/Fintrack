@@ -7,6 +7,7 @@ import com.fintrack.app.data.local.dao.WalletDao
 import com.fintrack.app.data.local.database.FinTrackDatabase
 import com.fintrack.app.data.local.entity.TransactionEntity
 import com.fintrack.app.data.local.entity.toDomain
+import com.fintrack.app.domain.model.DateRange
 import com.fintrack.app.domain.model.SyncStatus
 import com.fintrack.app.domain.model.Transaction
 import com.fintrack.app.domain.model.TransactionDraft
@@ -41,8 +42,22 @@ class TransactionRepository @Inject constructor(
     fun observeTransactions(): Flow<List<Transaction>> =
         transactionDao.observeAll().map { rows -> rows.map { it.toDomain() } }
 
+    /**
+     * Transaction history filtered by an optional date range and a free-text [query] matched
+     * against description, merchant and category name. A blank query matches everything.
+     */
+    fun observeTransactions(query: String, range: DateRange?): Flow<List<Transaction>> =
+        transactionDao.observeFiltered(
+            startMillis = range?.start?.toEpochMilli(),
+            endMillis = range?.endExclusive?.toEpochMilli(),
+            pattern = query.trim().takeIf { it.isNotEmpty() }?.let { "%${it.escapeLike()}%" },
+        ).map { rows -> rows.map { it.toDomain() } }
+
     fun observeWalletTransactions(walletId: String): Flow<List<Transaction>> =
         transactionDao.observeByWallet(walletId).map { rows -> rows.map { it.toDomain() } }
+
+    fun observeTransaction(id: String): Flow<Transaction?> =
+        transactionDao.observeById(id).map { it?.toDomain() }
 
     suspend fun getTransaction(id: String): Transaction? = transactionDao.getById(id)?.toDomain()
 
@@ -133,6 +148,9 @@ class TransactionRepository @Inject constructor(
             ?.let { CategoryRef(it.id, it.type, it.isArchived) }
         return TransactionValidator.validate(draft, source, destination, category, existing)
     }
+
+    private fun String.escapeLike(): String =
+        replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
 
     private fun String?.normalized(): String? = this?.trim()?.takeIf { it.isNotEmpty() }
 }

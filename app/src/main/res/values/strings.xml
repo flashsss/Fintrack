@@ -1,3 +1,140 @@
 <resources>
     <string name="app_name">FinTrack</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Beranda</string>
+    <string name="nav_transactions">Transaksi</string>
+    <string name="nav_analytics">Analisis</string>
+    <string name="nav_wallets">Dompet</string>
+    <string name="nav_settings">Pengaturan</string>
+
+    <!-- Common -->
+    <string name="action_back">Kembali</string>
+    <string name="action_save">Simpan</string>
+    <string name="action_cancel">Batal</string>
+    <string name="action_edit">Ubah</string>
+    <string name="action_delete">Hapus</string>
+    <string name="action_archive">Arsipkan</string>
+    <string name="action_select">Pilih</string>
+    <string name="action_apply">Terapkan</string>
+    <string name="action_clear">Hapus teks</string>
+    <string name="state_archived">Diarsipkan</string>
+    <string name="error_load_failed">Data gagal dimuat. Tutup lalu buka kembali halaman ini.</string>
+    <string name="error_save_failed">Data gagal disimpan. Silakan coba lagi.</string>
+    <string name="error_not_found">Data tidak ditemukan atau sudah dihapus.</string>
+    <string name="error_seed_failed">Kategori bawaan gagal disiapkan. Mulai ulang aplikasi untuk mencoba lagi.</string>
+    <string name="field_optional">%1$s (opsional)</string>
+
+    <!-- Unavailable destinations -->
+    <string name="unavailable_title">Belum tersedia</string>
+    <string name="unavailable_home">Ringkasan Beranda belum dibangun. Fitur ini direncanakan pada tahap pengembangan berikutnya.</string>
+    <string name="unavailable_analytics">Analisis keuangan belum dibangun. Fitur ini direncanakan pada tahap pengembangan berikutnya.</string>
+
+    <!-- Types -->
+    <string name="transaction_type_income">Pemasukan</string>
+    <string name="transaction_type_expense">Pengeluaran</string>
+    <string name="transaction_type_transfer">Transfer</string>
+    <string name="wallet_type_cash">Tunai</string>
+    <string name="wallet_type_bank">Bank</string>
+    <string name="wallet_type_e_wallet">E-wallet</string>
+    <string name="wallet_type_credit_card">Kartu kredit</string>
+    <string name="wallet_type_investment">Investasi</string>
+    <string name="wallet_type_other">Lainnya</string>
+    <string name="category_type_income">Pemasukan</string>
+    <string name="category_type_expense">Pengeluaran</string>
+    <string name="transaction_source_manual">Input manual</string>
+    <string name="transaction_source_csv">Impor CSV</string>
+
+    <!-- Transactions -->
+    <string name="transactions_title">Transaksi</string>
+    <string name="transactions_add">Tambah transaksi</string>
+    <string name="transactions_search">Cari transaksi</string>
+    <string name="transactions_empty">Belum ada transaksi. Ketuk Tambah transaksi untuk mencatat yang pertama.</string>
+    <string name="transactions_empty_filtered">Tidak ada transaksi yang cocok dengan pencarian atau periode ini.</string>
+    <string name="period_all">Semua</string>
+    <string name="period_this_month">Bulan ini</string>
+    <string name="period_last_month">Bulan lalu</string>
+    <string name="period_custom">Pilih tanggal</string>
+    <string name="period_custom_range">%1$s – %2$s</string>
+    <string name="period_picker_title">Pilih rentang tanggal</string>
+    <string name="transaction_new_title">Transaksi baru</string>
+    <string name="transaction_edit_title">Ubah transaksi</string>
+    <string name="transaction_detail_title">Detail transaksi</string>
+    <string name="transaction_field_type">Jenis transaksi</string>
+    <string name="transaction_field_amount">Jumlah</string>
+    <string name="transaction_field_wallet">Dompet</string>
+    <string name="transaction_field_source_wallet">Dari dompet</string>
+    <string name="transaction_field_destination_wallet">Ke dompet</string>
+    <string name="transaction_field_category">Kategori</string>
+    <string name="transaction_field_date">Tanggal</string>
+    <string name="transaction_field_description">Deskripsi</string>
+    <string name="transaction_field_merchant">Merchant</string>
+    <string name="transaction_field_source">Sumber data</string>
+    <string name="transaction_no_wallets">Belum ada dompet aktif. Buat dompet terlebih dahulu di menu Dompet.</string>
+    <string name="transaction_no_categories">Belum ada kategori aktif untuk jenis ini. Tambahkan di Pengaturan › Kategori.</string>
+    <string name="transaction_delete_title">Hapus transaksi?</string>
+    <string name="transaction_delete_message">Transaksi ini akan dihapus dan tidak lagi dihitung dalam saldo dompet.</string>
+    <string name="transaction_unknown_reference">Tidak diketahui</string>
+
+    <!-- Wallets -->
+    <string name="wallets_title">Dompet</string>
+    <string name="wallets_add">Tambah dompet</string>
+    <string name="wallets_empty">Belum ada dompet. Tambahkan dompet untuk mulai mencatat transaksi.</string>
+    <string name="wallets_archived_section">Dompet diarsipkan</string>
+    <string name="wallet_new_title">Dompet baru</string>
+    <string name="wallet_edit_title">Ubah dompet</string>
+    <string name="wallet_field_name">Nama dompet</string>
+    <string name="wallet_field_type">Jenis dompet</string>
+    <string name="wallet_field_initial_balance">Saldo awal</string>
+    <string name="wallet_initial_balance_negative">Saldo awal negatif (utang)</string>
+    <string name="wallet_initial_balance_negative_hint">Aktifkan untuk utang, misalnya tagihan kartu kredit yang belum dibayar.</string>
+    <string name="wallet_balance">Saldo saat ini</string>
+    <string name="wallet_history">Riwayat transaksi</string>
+    <string name="wallet_history_empty">Belum ada transaksi di dompet ini.</string>
+    <string name="wallet_archive_title">Arsipkan dompet?</string>
+    <string name="wallet_archive_message">Dompet yang diarsipkan tidak bisa dipilih untuk transaksi baru. Riwayat dan saldonya tetap tersimpan.</string>
+    <string name="wallet_archived_notice">Dompet ini diarsipkan dan tidak bisa dipilih untuk transaksi baru.</string>
+
+    <!-- Categories -->
+    <string name="categories_title">Kategori</string>
+    <string name="categories_add">Tambah kategori</string>
+    <string name="categories_empty">Belum ada kategori untuk jenis ini.</string>
+    <string name="categories_archived_section">Kategori diarsipkan</string>
+    <string name="category_new_title">Kategori baru</string>
+    <string name="category_edit_title">Ubah kategori</string>
+    <string name="category_field_name">Nama kategori</string>
+    <string name="category_field_type">Jenis kategori</string>
+    <string name="category_field_parent">Kategori induk</string>
+    <string name="category_no_parent">Tanpa induk</string>
+    <string name="category_type_locked">Jenis kategori tidak bisa diubah setelah dibuat.</string>
+    <string name="category_archive_title">Arsipkan kategori?</string>
+    <string name="category_archive_message">Kategori yang diarsipkan tidak bisa dipilih untuk transaksi baru. Transaksi lama tetap memakai kategori ini.</string>
+    <string name="category_archived_notice">Kategori ini diarsipkan dan tidak bisa dipilih untuk transaksi baru.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Pengaturan</string>
+    <string name="settings_categories">Kategori</string>
+    <string name="settings_categories_description">Kelola kategori pemasukan dan pengeluaran</string>
+
+    <!-- Validation -->
+    <string name="error_amount_required">Masukkan jumlah.</string>
+    <string name="error_amount_invalid">Jumlah hanya boleh berisi angka.</string>
+    <string name="error_amount_too_large">Jumlah terlalu besar.</string>
+    <string name="error_amount_not_positive">Jumlah harus lebih dari Rp0.</string>
+    <string name="error_wallet_required">Pilih dompet.</string>
+    <string name="error_wallet_archived">Dompet ini sudah diarsipkan. Pilih dompet lain.</string>
+    <string name="error_destination_required">Pilih dompet tujuan.</string>
+    <string name="error_destination_not_allowed">Dompet tujuan hanya untuk transfer.</string>
+    <string name="error_destination_same">Dompet tujuan harus berbeda dari dompet asal.</string>
+    <string name="error_category_required">Pilih kategori.</string>
+    <string name="error_category_transfer">Transfer tidak memakai kategori.</string>
+    <string name="error_category_type">Jenis kategori tidak sesuai dengan jenis transaksi.</string>
+    <string name="error_category_archived">Kategori ini sudah diarsipkan. Pilih kategori lain.</string>
+    <string name="error_name_required">Masukkan nama.</string>
+    <string name="error_parent_not_found">Kategori induk tidak ditemukan.</string>
+    <string name="error_parent_archived">Kategori induk sudah diarsipkan.</string>
+    <string name="error_parent_type">Kategori induk harus berjenis sama.</string>
+    <string name="error_parent_is_child">Subkategori tidak bisa menjadi induk.</string>
+    <string name="error_parent_self">Kategori tidak bisa menjadi induk dirinya sendiri.</string>
+    <string name="error_category_has_children">Kategori yang memiliki subkategori tidak bisa dipindahkan ke bawah kategori lain.</string>
 </resources>

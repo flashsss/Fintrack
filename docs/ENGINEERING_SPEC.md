@@ -175,6 +175,23 @@ negative (for example, credit card debt).
 - Categories are archived, never physically deleted. The foreign key prevents
   physically deleting a category that is referenced by transactions or children.
 
+### Default categories (Phase 2)
+
+- Seeded on every app start by `CategoryRepository.seedDefaultCategories()` (idempotent).
+- Each default has a stable key; its id is `UUID.nameUUIDFromBytes("fintrack.default-category.<key>")`,
+  inserted with `OnConflictStrategy.IGNORE`. Defaults are never duplicated, and a default the user
+  renamed or archived is never recreated or overwritten.
+- Income: Gaji, Bisnis, Investasi, Bonus, Hadiah, Pemasukan lainnya. Expense: Makanan dan minuman,
+  Transportasi, Belanja, Tempat tinggal, Tagihan, Kesehatan, Hiburan, Pendidikan, Perjalanan,
+  Kebutuhan pribadi, Pengeluaran lainnya.
+
+### Transaction history search and filter (Phase 2)
+
+- `TransactionDao.observeFiltered` filters by an optional UTC range `[start, end)` and an optional
+  LIKE pattern over description, merchant and category name. User input is escaped (`\`, `%`, `_`)
+  so wildcards are matched literally. Periods ("Bulan ini", "Bulan lalu", custom range) are
+  computed in `JakartaTime` with `Asia/Jakarta` boundaries.
+
 ## 7. Analytics rules (Phase 3+)
 
 - Every metric has a documented formula and uses actual database records.
@@ -189,7 +206,26 @@ negative (for example, credit card debt).
 - Anomaly detection (z-score, median, MAD) requires a minimum sample size and is a
   spending insight, never a fraud/suspicious-activity label.
 
-## 8. Security and privacy
+## 8. Presentation layer (Phase 2)
+
+- One package per feature under `presentation/` (`transactions`, `wallets`, `categories`,
+  `settings`), plus `common` (shared components, labels, error messages) and `navigation`.
+- Each screen has a `@HiltViewModel` exposing immutable state through `StateFlow`; form input lives
+  in a `MutableStateFlow` so text fields update synchronously.
+- Forms never re-implement validation: they submit through the repository and map
+  `WriteResult.Invalid` errors to field messages. Only amount parsing (text → `Long`) happens in
+  the form (`AmountInput`).
+- Option lists mirror the archive rule: archived wallets/categories are offered only when the
+  edited transaction already uses them.
+- Money is formatted by `formatRupiah` (`Rp1.500.000`); dates by `JakartaTime` (Indonesian locale).
+- Strings live in `res/values/strings.xml` (Bahasa Indonesia). Icons are Material Symbols vector
+  drawables (the Compose material-icons artifacts are no longer updated).
+- Beranda and Analisis show an explicit "Belum tersedia" screen until Phases 3–4; the app starts
+  on Transaksi.
+- Database read failures surface as error states; write failures (`SQLException`) as a form
+  message. Other exceptions are not caught.
+
+## 9. Security and privacy
 
 - Data stays local by default.
 - `android:allowBackup="false"`, and `data_extraction_rules.xml` excludes all domains from
@@ -198,7 +234,7 @@ negative (for example, credit card debt).
 - No hardcoded secrets; `local.properties` and keystores are git-ignored.
 - Supabase access (Phase 6) requires authentication and Row Level Security.
 
-## 9. Testing standards
+## 10. Testing standards
 
 - Pure business rules: JVM unit tests (`TransactionValidatorTest`, `CategoryValidatorTest`).
 - Room, DAO and repository behavior: Robolectric unit tests against a real in-memory Room
@@ -207,11 +243,14 @@ negative (for example, credit card debt).
 - `MigrationTestHelper` reads `app/schemas` as assets. Robolectric only sees the tested
   variant's merged assets, so the schemas are added to the `debug` source set's assets
   (debug APK only; release builds do not contain them).
+- ViewModels are tested against the real in-memory database with a test Main dispatcher.
+- Compose UI flow tests (`presentation/ui`) render real screens under Robolectric at a phone size
+  (`w411dp-h891dp`). Waits on non-UI conditions idle the paused main looper explicitly.
 - Every balance-affecting operation has a test, including edits and deletes of each
   transaction type and protection against duplicate effects.
 - A task is not complete until its tests pass.
 
-## 10. Engineering rules
+## 11. Engineering rules
 
 No fake production functionality, no TODO/FIXME in completed features, no hardcoded
 metrics, no swallowed exceptions, no unexplained warning suppressions, no deprecated APIs
@@ -221,7 +260,7 @@ no unrelated rewrites, no silent schema changes, no visual-only controls, no pla
 network data presented as real, no committed secrets, no speculative features, no
 incomplete features marked complete.
 
-## 11. Development workflow
+## 12. Development workflow
 
 Phases: 0 inspection → 1 foundation → 2 core transactions → 3 dashboard → 4 analytics →
 5 import and planning → 6 cloud sync → 7 quality and release.
