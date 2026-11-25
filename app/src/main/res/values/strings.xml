@@ -27,8 +27,63 @@
 
     <!-- Unavailable destinations -->
     <string name="unavailable_title">Belum tersedia</string>
-    <string name="unavailable_home">Ringkasan Beranda belum dibangun. Fitur ini direncanakan pada tahap pengembangan berikutnya.</string>
     <string name="unavailable_analytics">Analisis keuangan belum dibangun. Fitur ini direncanakan pada tahap pengembangan berikutnya.</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_title">Beranda</string>
+    <string name="dashboard_period_in_progress">%1$s · berjalan</string>
+    <string name="dashboard_period_not_started">Periode ini belum dimulai, jadi belum ada data untuk dilaporkan.</string>
+    <string name="dashboard_empty">Belum ada data keuangan. Tambahkan dompet di menu Dompet, lalu catat transaksi pertama.</string>
+    <string name="dashboard_balance_title">Total saldo dompet aktif</string>
+    <plurals name="dashboard_balance_note">
+        <item quantity="one">Saldo saat ini dari %1$d dompet aktif, tidak bergantung pada periode. Ini bukan kekayaan bersih: dompet yang diarsipkan serta aset dan utang di luar aplikasi tidak dihitung.</item>
+        <item quantity="other">Saldo saat ini dari %1$d dompet aktif, tidak bergantung pada periode. Ini bukan kekayaan bersih: dompet yang diarsipkan serta aset dan utang di luar aplikasi tidak dihitung.</item>
+    </plurals>
+    <string name="dashboard_income">Pemasukan</string>
+    <string name="dashboard_expense">Pengeluaran</string>
+    <string name="dashboard_net_cash_flow">Arus kas bersih</string>
+    <string name="dashboard_net_cash_flow_note">Pemasukan dikurangi pengeluaran pada periode ini. Transfer antardompet tidak dihitung.</string>
+    <string name="dashboard_saving_rate">Rasio tabungan</string>
+    <string name="dashboard_saving_rate_unavailable">Tidak tersedia (tidak ada pemasukan)</string>
+    <plurals name="dashboard_transaction_count">
+        <item quantity="one">%1$d transaksi</item>
+        <item quantity="other">%1$d transaksi</item>
+    </plurals>
+    <plurals name="dashboard_transaction_count_with_transfers">
+        <item quantity="one">%1$s, termasuk %2$d transfer</item>
+        <item quantity="other">%1$s, termasuk %2$d transfer</item>
+    </plurals>
+    <string name="dashboard_daily_title">Pemasukan dan pengeluaran harian</string>
+    <string name="dashboard_daily_empty">Tidak ada pemasukan atau pengeluaran pada periode ini.</string>
+    <plurals name="dashboard_daily_too_long">
+        <item quantity="one">Grafik harian tersedia untuk rentang hingga %1$d hari. Pilih rentang yang lebih pendek.</item>
+        <item quantity="other">Grafik harian tersedia untuk rentang hingga %1$d hari. Pilih rentang yang lebih pendek.</item>
+    </plurals>
+    <string name="dashboard_daily_axis_note">Sumbu bawah: tanggal. Hari setelah hari ini tidak ditampilkan.</string>
+    <string name="dashboard_daily_chart_description">Grafik batang harian %1$s. Total pemasukan %2$s, total pengeluaran %3$s.</string>
+    <string name="dashboard_breakdown_title">Pengeluaran per kategori</string>
+    <string name="dashboard_breakdown_empty">Belum ada pengeluaran pada periode ini.</string>
+    <plurals name="dashboard_breakdown_others">
+        <item quantity="one">Lainnya (%1$d kategori)</item>
+        <item quantity="other">Lainnya (%1$d kategori)</item>
+    </plurals>
+    <string name="dashboard_breakdown_uncategorized">Tanpa kategori</string>
+    <string name="dashboard_breakdown_chart_description">Diagram donat pengeluaran per kategori, total %1$s.</string>
+    <string name="dashboard_comparison_title">Dibandingkan bulan sebelumnya</string>
+    <string name="dashboard_comparison_spans">%1$s dibandingkan %2$s</string>
+    <string name="dashboard_comparison_custom">Perbandingan bulanan tersedia untuk periode Bulan ini atau Bulan lalu.</string>
+    <string name="dashboard_comparison_current">Periode ini</string>
+    <string name="dashboard_comparison_previous">Sebelumnya</string>
+    <string name="dashboard_comparison_change">Selisih</string>
+    <string name="dashboard_comparison_zero_baseline">Persentase tidak tersedia (nilai sebelumnya Rp0)</string>
+    <string name="dashboard_comparison_negative_baseline">Persentase tidak ditampilkan (nilai sebelumnya negatif)</string>
+    <string name="dashboard_comparison_full_month">Sebagai acuan, %1$s sebulan penuh: pemasukan %2$s, pengeluaran %3$s.</string>
+    <string name="dashboard_comparison_fair_note">Bulan berjalan dibandingkan dengan jumlah hari yang sama pada bulan sebelumnya.</string>
+    <string name="dashboard_wallets_title">Dompet aktif</string>
+    <string name="dashboard_wallets_empty">Belum ada dompet aktif.</string>
+    <string name="dashboard_recent_title">Transaksi terbaru</string>
+    <string name="dashboard_recent_empty">Belum ada transaksi.</string>
+    <string name="dashboard_see_all_transactions">Lihat semua transaksi</string>
 
     <!-- Types -->
     <string name="transaction_type_income">Pemasukan</string>

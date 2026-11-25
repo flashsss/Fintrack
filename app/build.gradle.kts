@@ -77,6 +77,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
+    implementation(libs.vico.compose.m3)
 
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)

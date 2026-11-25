@@ -47,6 +47,22 @@ object JakartaTime {
 
     fun formatDate(date: LocalDate): String = DATE_FORMAT.format(date)
 
+    private val DAY_FORMAT = DateTimeFormatter.ofPattern("d", LOCALE)
+    private val DAY_MONTH_FORMAT = DateTimeFormatter.ofPattern("d MMM", LOCALE)
+    private val MONTH_YEAR_FORMAT = DateTimeFormatter.ofPattern("MMMM yyyy", LOCALE)
+
+    /** Compact inclusive span: "1–25 Nov 2026", "28 Nov – 5 Des 2026", "28 Des 2025 – 3 Jan 2026". */
+    fun formatSpan(first: LocalDate, last: LocalDate): String = when {
+        first == last -> formatDate(first)
+        first.year != last.year -> "${formatDate(first)} – ${formatDate(last)}"
+        first.month != last.month -> "${DAY_MONTH_FORMAT.format(first)} – ${formatDate(last)}"
+        else -> "${DAY_FORMAT.format(first)}–${formatDate(last)}"
+    }
+
+    /** "November 2026". */
+    fun formatMonth(date: LocalDate): String =
+        MONTH_YEAR_FORMAT.format(date).replaceFirstChar { it.titlecase(LOCALE) }
+
     fun formatDayHeader(date: LocalDate): String =
         DAY_HEADER_FORMAT.format(date).replaceFirstChar { it.titlecase(LOCALE) }
 }

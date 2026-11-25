@@ -10,9 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.DateRangePicker
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -20,8 +17,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDateRangePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,6 +30,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.fintrack.app.R
 import com.fintrack.app.core.util.JakartaTime
+import com.fintrack.app.presentation.common.DateRangePickerDialog
 import com.fintrack.app.presentation.common.FinTopBar
 import com.fintrack.app.presentation.common.LoadingState
 import com.fintrack.app.presentation.common.MessageState
@@ -101,7 +97,6 @@ private fun SearchField(query: String, onQueryChange: (String) -> Unit) {
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PeriodChips(period: PeriodFilter, onPeriodChange: (PeriodFilter) -> Unit) {
     var showRangePicker by rememberSaveable { mutableStateOf(false) }
@@ -149,41 +144,12 @@ private fun PeriodChips(period: PeriodFilter, onPeriodChange: (PeriodFilter) -> 
     }
 
     if (showRangePicker) {
-        val pickerState = rememberDateRangePickerState()
-        DatePickerDialog(
-            onDismissRequest = { showRangePicker = false },
-            confirmButton = {
-                TextButton(
-                    enabled = pickerState.selectedStartDateMillis != null,
-                    onClick = {
-                        val start = pickerState.selectedStartDateMillis
-                        if (start != null) {
-                            val end = pickerState.selectedEndDateMillis ?: start
-                            onPeriodChange(
-                                PeriodFilter.Custom(
-                                    JakartaTime.pickerMillisToDate(start),
-                                    JakartaTime.pickerMillisToDate(end),
-                                ),
-                            )
-                        }
-                        showRangePicker = false
-                    },
-                ) { Text(stringResource(R.string.action_apply)) }
+        DateRangePickerDialog(
+            onDismiss = { showRangePicker = false },
+            onConfirm = { first, last ->
+                onPeriodChange(PeriodFilter.Custom(first, last))
+                showRangePicker = false
             },
-            dismissButton = {
-                TextButton(onClick = { showRangePicker = false }) { Text(stringResource(R.string.action_cancel)) }
-            },
-        ) {
-            DateRangePicker(
-                state = pickerState,
-                title = {
-                    Text(
-                        stringResource(R.string.period_picker_title),
-                        modifier = Modifier.padding(start = 24.dp, end = 12.dp, top = 16.dp),
-                    )
-                },
-                modifier = Modifier.weight(1f),
-            )
-        }
+        )
     }
 }

@@ -5,6 +5,7 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.fintrack.app.data.local.database.FinTrackDatabase
 import com.fintrack.app.data.repository.CategoryRepository
+import com.fintrack.app.data.repository.ReportRepository
 import com.fintrack.app.data.repository.TransactionRepository
 import com.fintrack.app.data.repository.WalletRepository
 import java.time.Clock
@@ -23,6 +24,7 @@ class TestDatabase {
     val wallets = WalletRepository(db, db.walletDao(), clock)
     val categories = CategoryRepository(db, db.categoryDao(), clock)
     val transactions = TransactionRepository(db, db.transactionDao(), db.walletDao(), db.categoryDao(), clock)
+    val reports = ReportRepository(db.reportDao())
 
     fun close() = db.close()
 }

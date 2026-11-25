@@ -33,6 +33,7 @@ import com.fintrack.app.R
 import com.fintrack.app.presentation.categories.CategoryFormScreen
 import com.fintrack.app.presentation.categories.CategoryListScreen
 import com.fintrack.app.presentation.common.UnavailableScreen
+import com.fintrack.app.presentation.dashboard.DashboardScreen
 import com.fintrack.app.presentation.settings.SettingsScreen
 import com.fintrack.app.presentation.transactions.TransactionDetailScreen
 import com.fintrack.app.presentation.transactions.TransactionFormScreen
@@ -102,9 +103,14 @@ private fun FinTrackNavHost(navController: NavHostController, modifier: Modifier
         defaultValue = null
     }
 
-    // Beranda is not built yet, so the app opens on the working Transaksi screen.
-    NavHost(navController, startDestination = Routes.TRANSACTIONS, modifier = modifier) {
-        composable(Routes.HOME) { UnavailableScreen(R.string.nav_home, R.string.unavailable_home) }
+    NavHost(navController, startDestination = Routes.HOME, modifier = modifier) {
+        composable(Routes.HOME) {
+            DashboardScreen(
+                onOpenTransaction = { navController.navigate(Routes.transactionDetail(it)) },
+                onOpenWallet = { navController.navigate(Routes.walletDetail(it)) },
+                onSeeAllTransactions = { navController.navigateTopLevel(Routes.TRANSACTIONS) },
+            )
+        }
         composable(Routes.ANALYTICS) { UnavailableScreen(R.string.nav_analytics, R.string.unavailable_analytics) }
 
         composable(Routes.TRANSACTIONS) {

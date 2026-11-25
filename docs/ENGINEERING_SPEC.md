@@ -27,7 +27,7 @@ detailed reference. If they ever disagree, raise it instead of silently choosing
 | Architecture | MVVM, Repository Pattern | Phase 1 (repositories), Phase 2 (ViewModels) |
 | Navigation | Navigation Compose | Phase 2 |
 | Preferences | DataStore (no `app_settings` table) | When the first preference is needed |
-| Charts | Vico or another maintained Compose chart library | Phase 3 |
+| Charts | Vico 3.3.1 (`compose-m3`) | Phase 3 |
 | CSV import | Storage Access Framework + maintained CSV parser | Phase 5 |
 | Cloud sync | Supabase (Auth, PostgreSQL, RLS), WorkManager | Phase 6 |
 
@@ -192,19 +192,56 @@ negative (for example, credit card debt).
   so wildcards are matched literally. Periods ("Bulan ini", "Bulan lalu", custom range) are
   computed in `JakartaTime` with `Asia/Jakarta` boundaries.
 
-## 7. Analytics rules (Phase 3+)
+## 7. Analytics rules
 
 - Every metric has a documented formula and uses actual database records.
-- Transfers are excluded from income and expense metrics.
-- Net cash flow = income − expenses.
-- Saving rate = (income − expenses) / income × 100; null/unavailable when income is 0.
-- Expense ratio = expenses / income × 100; null/unavailable when income is 0.
-- Period growth = (current − previous) / previous × 100; zero and negative baselines are
-  handled explicitly.
+- Transfers are excluded from income and expense metrics (they are only counted in the
+  transaction count, labelled "termasuk N transfer").
+- Soft-deleted transactions are excluded everywhere.
 - Respect the selected date range and `Asia/Jakarta` boundaries; never compare incomplete
   periods without showing the date range.
 - Anomaly detection (z-score, median, MAD) requires a minimum sample size and is a
-  spending insight, never a fraud/suspicious-activity label.
+  spending insight, never a fraud/suspicious-activity label (Phase 4).
+
+### Dashboard metrics (Phase 3)
+
+| Metric | Formula | Notes |
+|---|---|---|
+| Total saldo dompet aktif | Σ balance of wallets with `isActive = 1` | Balances from `WalletDao.observeBalances()` (the single balance formula). Negative balances included, archived wallets excluded. Independent of the selected period. Not net worth. |
+| Pemasukan / Pengeluaran | Σ amount of INCOME / EXPENSE in the reported range | `ReportDao.observePeriodTotals` |
+| Arus kas bersih | income − expense | May be negative. |
+| Rasio tabungan | (income − expense) / income × 100 | Unavailable when income = 0; may be negative. |
+| Jumlah transaksi | COUNT of all non-deleted transactions in range | Transfers counted and shown separately. |
+| Harian | Σ INCOME / EXPENSE per Jakarta day | Missing days are zero; days after today are not shown. |
+| Pengeluaran per kategori | Σ EXPENSE grouped by `categoryId` | Top 5 by amount (ties by id), rest merged as "Lainnya (n kategori)". Share = slice / Σ expense × 100; no slices when Σ = 0. Archived categories keep their name; a null id is "Tanpa kategori". |
+| Perubahan | absolute = current − previous; % = (current − previous) / previous × 100 | % only when previous > 0. Zero baseline → "tidak tersedia"; negative baseline (net cash flow) → not shown. |
+
+### Reporting periods
+
+- Periods: Bulan ini, Bulan lalu, or a custom Jakarta date range. All period-dependent
+  sections share one selected period.
+- Reported range = first day .. min(last day, today). Days after today are never reported,
+  so future-dated transactions are excluded from period reports (but are part of wallet
+  balances, which include every recorded transaction). A range entirely in the future
+  reports nothing.
+- The daily chart is shown for ranges up to 62 days.
+- Monthly comparison:
+  - Bulan ini (in progress): days 1..D of this month vs days 1..D of the previous month
+    (D clamped to that month's length). The full previous month is shown separately as a
+    reference, without a percentage.
+  - Bulan lalu: full month vs the full month before.
+  - Custom range: no monthly comparison (stated in the UI).
+- "Today" is evaluated in `Asia/Jakarta` when the period is selected.
+
+### Report queries
+
+`ReportDao` holds all dashboard SQL: period totals, daily totals, expense per category,
+recent transactions and "has any transaction". Daily totals group by
+`(transactionDate − rangeStart) / 86 400 000`; this is exact because Asia/Jakarta has no DST,
+and `ReportRepository` verifies that every day in the range is 24 hours before querying.
+Range queries use `+deletedAt IS NULL` so SQLite uses the `transactionDate` /
+`(type, transactionDate)` indexes instead of the low-selectivity `deletedAt` index
+(`ReportQueryPlanTest` guards this). No schema change was needed.
 
 ## 8. Presentation layer (Phase 2)
 
@@ -220,8 +257,10 @@ negative (for example, credit card debt).
 - Money is formatted by `formatRupiah` (`Rp1.500.000`); dates by `JakartaTime` (Indonesian locale).
 - Strings live in `res/values/strings.xml` (Bahasa Indonesia). Icons are Material Symbols vector
   drawables (the Compose material-icons artifacts are no longer updated).
-- Beranda and Analisis show an explicit "Belum tersedia" screen until Phases 3–4; the app starts
-  on Transaksi.
+- Beranda is the dashboard and the start destination. Analisis shows an explicit
+  "Belum tersedia" screen until Phase 4.
+- Charts use Vico 3.3.1 (column chart for daily values, donut for categories), drawn
+  statically without animation; chart colors come from `LocalChartColors` (light and dark).
 - Database read failures surface as error states; write failures (`SQLException`) as a form
   message. Other exceptions are not caught.
 

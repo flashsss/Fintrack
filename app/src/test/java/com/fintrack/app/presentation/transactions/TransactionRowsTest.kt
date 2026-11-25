@@ -43,4 +43,12 @@ class TransactionRowsTest {
         assertEquals("-Rp1.500.000", TransactionRows.toRow(transfer, wallets, categories, "bca").amountText)
         assertEquals("+Rp1.500.000", TransactionRows.toRow(transfer, wallets, categories, "mandiri").amountText)
     }
+
+    @Test
+    fun `note shows description and merchant when both exist`() {
+        val both = tx(TransactionType.EXPENSE, category = "food").copy(description = "Makan siang")
+        assertEquals("Makan siang · Toko", TransactionRows.toRow(both, wallets, categories).note)
+        val none = tx(TransactionType.EXPENSE, category = "food").copy(merchant = null)
+        assertEquals(null, TransactionRows.toRow(none, wallets, categories).note)
+    }
 }

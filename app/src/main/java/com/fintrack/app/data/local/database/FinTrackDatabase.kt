@@ -3,6 +3,7 @@ package com.fintrack.app.data.local.database
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.fintrack.app.data.local.dao.CategoryDao
+import com.fintrack.app.data.local.dao.ReportDao
 import com.fintrack.app.data.local.dao.TransactionDao
 import com.fintrack.app.data.local.dao.WalletDao
 import com.fintrack.app.data.local.entity.CategoryEntity
@@ -29,6 +30,7 @@ abstract class FinTrackDatabase : RoomDatabase() {
     abstract fun walletDao(): WalletDao
     abstract fun categoryDao(): CategoryDao
     abstract fun transactionDao(): TransactionDao
+    abstract fun reportDao(): ReportDao
 
     companion object {
         const val NAME = "fintrack.db"

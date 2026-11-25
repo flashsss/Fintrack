@@ -75,7 +75,7 @@ object TransactionRows {
             } else {
                 source
             },
-            note = transaction.description ?: transaction.merchant,
+            note = listOfNotNull(transaction.description, transaction.merchant).joinToString(" · ").ifEmpty { null },
             amountText = when (direction) {
                 AmountDirection.IN -> "+$amount"
                 AmountDirection.OUT -> "-$amount"

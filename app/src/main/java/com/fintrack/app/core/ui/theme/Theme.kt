@@ -5,6 +5,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
 /**
@@ -67,13 +70,56 @@ private val DarkColors = darkColorScheme(
     surfaceContainerHighest = Color(0xFF303635),
 )
 
+/**
+ * Data-visualization colors. Each light color has at least 3:1 contrast on the light surface and
+ * each dark color on the dark surface, and adjacent categorical colors differ in hue.
+ */
+@Immutable
+data class ChartColors(
+    val income: Color,
+    val expense: Color,
+    /** Categorical palette for the top five categories; [others] is for the merged remainder. */
+    val categories: List<Color>,
+    val others: Color,
+)
+
+private val LightChartColors = ChartColors(
+    income = Color(0xFF00796B),
+    expense = Color(0xFFC0503E),
+    categories = listOf(
+        Color(0xFF00796B),
+        Color(0xFF3D6DB5),
+        Color(0xFFB86E00),
+        Color(0xFF8A4FA6),
+        Color(0xFFB8475E),
+    ),
+    others = Color(0xFF7A8582),
+)
+
+private val DarkChartColors = ChartColors(
+    income = Color(0xFF4FD1C0),
+    expense = Color(0xFFF2937F),
+    categories = listOf(
+        Color(0xFF4FD1C0),
+        Color(0xFF8AB4F8),
+        Color(0xFFF0B05A),
+        Color(0xFFCE9BE6),
+        Color(0xFFF08CA0),
+    ),
+    others = Color(0xFFA3ADAA),
+)
+
+val LocalChartColors = staticCompositionLocalOf { LightChartColors }
+
 @Composable
 fun FinTrackTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
-    MaterialTheme(
-        colorScheme = if (darkTheme) DarkColors else LightColors,
-        content = content,
-    )
+    CompositionLocalProvider(LocalChartColors provides if (darkTheme) DarkChartColors else LightChartColors) {
+        MaterialTheme(
+            colorScheme = if (darkTheme) DarkColors else LightColors,
+            content = content,
+        )
+    }
 }
