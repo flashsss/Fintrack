@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Launcher glyph: three rising bars on a baseline, inside the 66dp adaptive-icon safe zone. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M36,58h8a2,2 0,0 1,2 2v12a2,2 0,0 1,-2 2h-8a2,2 0,0 1,-2 -2v-12a2,2 0,0 1,2 -2z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M50,48h8a2,2 0,0 1,2 2v22a2,2 0,0 1,-2 2h-8a2,2 0,0 1,-2 -2v-22a2,2 0,0 1,2 -2z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M64,36h8a2,2 0,0 1,2 2v34a2,2 0,0 1,-2 2h-8a2,2 0,0 1,-2 -2v-34a2,2 0,0 1,2 -2z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M32,77h44v3h-44z" />
+</vector>

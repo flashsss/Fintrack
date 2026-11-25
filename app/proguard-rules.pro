@@ -1,1 +1,1 @@
-# Project-specific R8 rules. Minification is disabled in Phase 1.
+# Project-specific R8 rules. None are needed: the libraries in use ship consumer rules.

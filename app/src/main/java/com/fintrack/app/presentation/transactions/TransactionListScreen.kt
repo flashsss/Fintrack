@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -30,6 +29,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.fintrack.app.R
 import com.fintrack.app.core.util.JakartaTime
+import com.fintrack.app.presentation.common.AddFab
 import com.fintrack.app.presentation.common.DateRangePickerDialog
 import com.fintrack.app.presentation.common.FinTopBar
 import com.fintrack.app.presentation.common.LoadingState
@@ -48,11 +48,7 @@ fun TransactionListScreen(
     Scaffold(
         topBar = { FinTopBar(stringResource(R.string.transactions_title)) },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = onAddTransaction,
-                icon = { Icon(painterResource(R.drawable.ic_add), contentDescription = null) },
-                text = { Text(stringResource(R.string.transactions_add)) },
-            )
+            AddFab(stringResource(R.string.transactions_add), onClick = onAddTransaction)
         },
     ) { padding ->
         Column(Modifier.padding(padding).fillMaxSize()) {

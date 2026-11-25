@@ -26,7 +26,11 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            // R8 shrinking and obfuscation; libraries (Room, Hilt, Compose, Vico, Commons CSV)
+            // ship their own keep rules. No signing config is committed: release signing keys
+            // are supplied outside the repository.
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",

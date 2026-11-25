@@ -340,6 +340,22 @@ Full design, formulas and review decisions: `docs/PHASE_4_TECHNICAL_DESIGN.md` (
 - Never log transaction amounts or other sensitive financial details.
 - No hardcoded secrets; `local.properties` and keystores are git-ignored.
 - Supabase access (Phase 6) requires authentication and Row Level Security.
+- Phase 7 review: no `INTERNET` permission (nothing can leave the device); no logging calls in
+  app code; only the launcher activity is exported; CSV files are read through the system picker
+  with a one-time read grant, size-capped before decoding, and never copied.
+- Budget notifications are `VISIBILITY_PRIVATE` with a generic public version, so category
+  names and amounts are not shown on a secure lock screen.
+
+### Release build (Phase 7)
+
+- `./gradlew :app:assembleRelease` runs R8 (minify + resource shrinking) and produces
+  `app-release-unsigned.apk`. No signing configuration or keystore is committed; sign with
+  `apksigner` (or a Gradle signing config read from outside the repository) before distribution.
+- No project keep rules are needed: Room, Hilt, Compose, Vico and Commons CSV ship consumer
+  rules. The release APK has been built and inspected (Room `_Impl` and entry points kept) but
+  not yet run on a device.
+- `targetSdk` stays 36 until the app is tested on an API 37 device (lint `OldTargetApi`).
+- Launcher icon: adaptive vector icon with a monochrome layer (themed icons).
 
 ## 10. Testing standards
 
@@ -353,6 +369,9 @@ Full design, formulas and review decisions: `docs/PHASE_4_TECHNICAL_DESIGN.md` (
 - ViewModels are tested against the real in-memory database with a test Main dispatcher.
 - Compose UI flow tests (`presentation/ui`) render real screens under Robolectric at a phone size
   (`w411dp-h891dp`). Waits on non-UI conditions idle the paused main looper explicitly.
+- `AccessibilityChecksTest` walks the semantics tree of key screens and requires a spoken label
+  on every clickable node (with a negative control). Google's Accessibility Test Framework was
+  tried and does not see Compose nodes under Robolectric, so it is not used.
 - Every balance-affecting operation has a test, including edits and deletes of each
   transaction type and protection against duplicate effects.
 - A task is not complete until its tests pass.

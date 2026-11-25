@@ -106,5 +106,13 @@ class BudgetAlertFlowTest {
         val posted = shadowOf(manager).allNotifications.single()
         assertEquals("Anggaran Semua pengeluaran terlampaui", shadowOf(posted).contentTitle)
         assertEquals("Rp1.200.000 dari Rp1.000.000 bulan ini", shadowOf(posted).contentText)
+        // Lock screen: amounts and names hidden behind a generic public version; tapping opens the app.
+        assertEquals(android.app.Notification.VISIBILITY_PRIVATE, posted.visibility)
+        assertEquals("Pemberitahuan anggaran", shadowOf(posted.publicVersion).contentTitle)
+        assertEquals(null, shadowOf(posted.publicVersion).contentText)
+        assertEquals(
+            com.fintrack.app.MainActivity::class.java.name,
+            shadowOf(posted.contentIntent).savedIntent.component?.className,
+        )
     }
 }

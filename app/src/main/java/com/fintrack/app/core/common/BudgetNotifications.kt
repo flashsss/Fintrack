@@ -3,12 +3,15 @@ package com.fintrack.app.core.common
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import com.fintrack.app.MainActivity
 import com.fintrack.app.R
 import com.fintrack.app.analytics.metrics.BudgetAlert
 import com.fintrack.app.analytics.metrics.BudgetAlertKind
@@ -39,10 +42,18 @@ class BudgetNotifications(private val context: Context) : BudgetAlertSink {
                 name,
             )
             val text = context.getString(R.string.notification_budget_text, formatRupiah(alert.spent), formatRupiah(alert.limit))
+            // On a secure lock screen only a generic line is shown; names and amounts stay hidden.
+            val publicVersion = NotificationCompat.Builder(context, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_account_balance_wallet)
+                .setContentTitle(context.getString(R.string.notification_budget_public_title))
+                .build()
             val notification = NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_account_balance_wallet)
                 .setContentTitle(title)
                 .setContentText(text)
+                .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+                .setPublicVersion(publicVersion)
+                .setContentIntent(openApp())
                 .setAutoCancel(true)
                 .build()
             try {
@@ -53,6 +64,13 @@ class BudgetNotifications(private val context: Context) : BudgetAlertSink {
             }
         }
     }
+
+    private fun openApp(): PendingIntent = PendingIntent.getActivity(
+        context,
+        0,
+        Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP),
+        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+    )
 
     companion object {
         const val CHANNEL_ID = "budget_alerts"

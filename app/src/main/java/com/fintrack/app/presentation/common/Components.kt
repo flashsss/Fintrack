@@ -21,6 +21,7 @@ import androidx.compose.material3.ExposedDropdownMenu
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -41,6 +42,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
@@ -305,4 +311,22 @@ fun FormColumn(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     ) {
         content()
     }
+}
+
+/**
+ * Extended FAB with one spoken label. Material 3 clears the label's semantics while the expand
+ * animation has not finished, so the label is set on the button itself, independent of animation.
+ */
+@Composable
+fun AddFab(label: String, onClick: () -> Unit) {
+    ExtendedFloatingActionButton(
+        onClick = onClick,
+        icon = { Icon(painterResource(R.drawable.ic_add), contentDescription = null) },
+        text = { Text(label) },
+        modifier = Modifier.clearAndSetSemantics {
+            contentDescription = label
+            role = Role.Button
+            onClick { onClick(); true }
+        },
+    )
 }
