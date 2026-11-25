@@ -28,7 +28,7 @@ detailed reference. If they ever disagree, raise it instead of silently choosing
 | Navigation | Navigation Compose | Phase 2 |
 | Preferences | DataStore (no `app_settings` table) | When the first preference is needed |
 | Charts | Vico 3.3.1 (`compose-m3`) | Phase 3 |
-| CSV import | Storage Access Framework + maintained CSV parser | Phase 5 |
+| CSV import | Storage Access Framework + Apache Commons CSV 1.14.1 | Phase 5 |
 | Cloud sync | Supabase (Auth, PostgreSQL, RLS), WorkManager | Phase 6 |
 
 Dependencies are added only in the phase that uses them. All versions live in
@@ -114,8 +114,12 @@ Rules:
 | `transactions` | id, walletId → wallets, destinationWalletId → wallets, categoryId → categories, type, amount, transactionDate, description, merchant, source, importBatchId, externalId, createdAt, updatedAt, deletedAt, syncStatus |
 | `sync_outbox` | id, entityType, entityId, operation, createdAt, attemptCount, lastAttemptAt, lastError |
 
-Deferred tables (each introduced by an explicit migration in its phase):
-`budgets` and `financial_goals` (Phase 5), `recurring_transactions` (not yet scheduled).
+Schema v2 (Phase 5, `MIGRATION_1_2`): `budgets` (id, categoryId → categories RESTRICT or NULL for
+the overall budget, amount, timestamps, deletedAt, syncStatus) and `financial_goals` (id, name,
+targetAmount, currentAmount, targetDate as UTC millis of a Jakarta midnight or NULL, timestamps,
+deletedAt, syncStatus).
+
+Deferred tables: `recurring_transactions` (not yet scheduled).
 `app_settings` is replaced by DataStore.
 
 ### Migration policy
@@ -272,6 +276,41 @@ Full design, formulas and review decisions: `docs/PHASE_4_TECHNICAL_DESIGN.md` (
   standard deviation (Welford), minimum sample size per statistic.
 - Not implemented on purpose: hour-of-day analysis (stored time is entry time), merchant median,
   daily-anomaly insight, fuzzy merchant matching, approximate percentiles, covering index.
+
+### Planning (Phase 5)
+
+- Budgets are monthly limits, either overall (all expense) or per expense category; one active
+  budget per scope. Spending formula: sum of EXPENSE amounts in the current Jakarta calendar month
+  (transfers and income excluded); a parent-category budget includes its subcategories, a
+  subcategory budget counts only itself. Utilization = spent / limit; remaining = limit − spent
+  (may be negative). Levels: below 80%, 80% (warning), 100% (exceeded).
+- Budget notifications (channel `budget_alerts`, needs POST_NOTIFICATIONS on Android 13+) fire
+  when a new expense in the current month crosses 80% or 100% of a budget; editing an existing
+  transaction does not alert.
+- Goals: target amount, manually updated current amount, optional target date. Percent =
+  current / target; months left include the current month; required per month = remaining /
+  months left rounded up. Goals do not move money between wallets.
+
+### CSV import (Phase 5)
+
+1. Pick: Storage Access Framework (`OpenDocument`); files over 5 MB or 10 000 data rows are
+   rejected, never truncated. Text is UTF-8, or Windows-1252 when not valid UTF-8; BOM removed.
+   Delimiter `;` or `,` detected from the header line; RFC 4180 quoting.
+2. Map: date column + format (`dd/MM/yyyy`, `dd-MM-yyyy`, `yyyy-MM-dd`, strict), amount column,
+   optional description, merchant and category columns, target wallet, fallback income and
+   expense categories. Amounts are Indonesian-formatted whole rupiah; negative = EXPENSE,
+   positive = INCOME. Transfers cannot be imported. Category names match active categories of
+   the row's type (case-insensitive); otherwise the fallback is used. Time is 12:00 WIB.
+3. Review (nothing written): rows are ready, failed (with reasons: missing/invalid/future date,
+   missing/invalid/fractional/zero/too large amount) or duplicates.
+   Fingerprint = SHA-256 of wallet, date, type, amount, normalized description and merchant,
+   with `#n` for the n-th identical row in the file; stored in `externalId`.
+   Duplicate kinds: already imported (fingerprint stored for the wallet, including soft-deleted
+   rows; never importable), repeated identical row in the file, possible existing (same wallet,
+   Jakarta day, type and amount). The last two are skipped unless the user includes them.
+4. Confirm dialog, then one Room transaction: every row is re-validated with
+   `TransactionValidator` and its fingerprint re-checked; any failure writes nothing.
+   Rows get `source = CSV_IMPORT`, a shared `importBatchId` and the fingerprint.
 
 ## 8. Presentation layer (Phase 2)
 

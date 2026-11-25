@@ -10,6 +10,7 @@ import com.fintrack.app.data.repository.AnalyticsRepository
 import com.fintrack.app.analytics.metrics.BudgetAlert
 import com.fintrack.app.data.repository.BudgetAlertChecker
 import com.fintrack.app.data.repository.CategoryRepository
+import com.fintrack.app.data.repository.ImportRepository
 import com.fintrack.app.data.repository.PlanningRepository
 import com.fintrack.app.data.repository.ReportRepository
 import com.fintrack.app.data.repository.TransactionRepository
@@ -32,6 +33,7 @@ class TestDatabase {
     val categories = CategoryRepository(db, db.categoryDao(), clock)
     val transactions = TransactionRepository(db, db.transactionDao(), db.walletDao(), db.categoryDao(), clock)
     val reports = ReportRepository(db.reportDao())
+    val imports = ImportRepository(db, db.importDao(), db.transactionDao(), db.walletDao(), db.categoryDao(), clock)
     val planning = PlanningRepository(db, db.planningDao(), db.categoryDao(), clock)
 
     /** Budget alerts delivered by [budgetAlerts], in order. */

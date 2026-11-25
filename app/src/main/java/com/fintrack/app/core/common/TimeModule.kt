@@ -28,4 +28,7 @@ object TimeModule {
 
     @Provides
     fun provideBudgetAlertSink(notifications: BudgetNotifications): com.fintrack.app.data.repository.BudgetAlertSink = notifications
+
+    @Provides
+    fun provideDocumentTextReader(reader: ContentDocumentTextReader): DocumentTextReader = reader
 }

@@ -16,7 +16,7 @@ import com.fintrack.app.R
 import com.fintrack.app.presentation.common.FinTopBar
 
 @Composable
-fun SettingsScreen(onOpenCategories: () -> Unit, onOpenPlanning: () -> Unit) {
+fun SettingsScreen(onOpenCategories: () -> Unit, onOpenPlanning: () -> Unit, onOpenImport: () -> Unit) {
     Scaffold(topBar = { FinTopBar(stringResource(R.string.settings_title)) }) { padding ->
         Column(Modifier.padding(padding).fillMaxSize()) {
             ListItem(
@@ -30,6 +30,12 @@ fun SettingsScreen(onOpenCategories: () -> Unit, onOpenPlanning: () -> Unit) {
                 leadingContent = { Icon(painterResource(R.drawable.ic_account_balance_wallet), contentDescription = null) },
                 supportingContent = { Text(stringResource(R.string.planning_description)) },
             ) { Text(stringResource(R.string.planning_title)) }
+            HorizontalDivider()
+            ListItem(
+                onClick = onOpenImport,
+                leadingContent = { Icon(painterResource(R.drawable.ic_receipt_long), contentDescription = null) },
+                supportingContent = { Text(stringResource(R.string.settings_import_description)) },
+            ) { Text(stringResource(R.string.settings_import)) }
             HorizontalDivider()
         }
     }

@@ -3,6 +3,7 @@ package com.fintrack.app.data.local
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.fintrack.app.data.TestDatabase
 import com.fintrack.app.data.local.dao.AnalyticsSql
+import com.fintrack.app.data.local.dao.ImportSql
 import com.fintrack.app.data.local.dao.ReportSql
 import org.junit.After
 import org.junit.Assert.assertTrue
@@ -72,5 +73,13 @@ class ReportQueryPlanTest {
             val plan = plan(sql, 0L, 10L)
             assertTrue(plan, plan.contains("index_transactions_type_transactionDate"))
         }
+    }
+
+    @Test
+    fun `import look-ups use an index instead of scanning transactions`() {
+        val stored = plan(ImportSql.STORED_FINGERPRINTS.replace("(:externalIds)", "(?, ?)"), "w", "a", "b")
+        assertTrue(stored, stored.contains("index_transactions_walletId"))
+        val existing = plan(ImportSql.EXISTING_KEYS, "w", 0L, 10L)
+        assertTrue(existing, existing.contains("USING INDEX") && !existing.contains("SCAN transactions"))
     }
 }

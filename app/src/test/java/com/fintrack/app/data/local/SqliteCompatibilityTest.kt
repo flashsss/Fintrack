@@ -1,6 +1,7 @@
 package com.fintrack.app.data.local
 
 import com.fintrack.app.data.local.dao.AnalyticsSql
+import com.fintrack.app.data.local.dao.ImportSql
 import com.fintrack.app.data.local.dao.ReportSql
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -76,6 +77,12 @@ class SqliteCompatibilityTest {
         assertEquals(0, run(ExpenseDistributionReader.SQL))
         assertEquals(0, run(AnalyticsSql.EXPENSE_BY_MERCHANT))
         assertEquals(0, run(AnalyticsSql.MERCHANTS_SEEN))
+    }
+
+    @Test
+    fun `import queries run on SQLite 3_21`() {
+        assertEquals(0, run(ImportSql.STORED_FINGERPRINTS.replace("(:externalIds)", "(?, ?)")))
+        assertEquals(0, run(ImportSql.EXISTING_KEYS))
     }
 
     @Test

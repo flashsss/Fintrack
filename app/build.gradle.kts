@@ -78,6 +78,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.vico.compose.m3)
+    // CSV import (Phase 5): RFC 4180 parsing with quoted fields; no hand-written parser.
+    implementation(libs.commons.csv)
 
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)

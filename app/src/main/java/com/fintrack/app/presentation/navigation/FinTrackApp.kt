@@ -35,6 +35,7 @@ import com.fintrack.app.presentation.categories.CategoryListScreen
 import com.fintrack.app.presentation.analysis.AnalysisScreen
 import com.fintrack.app.presentation.dashboard.DashboardScreen
 import com.fintrack.app.core.util.JakartaTime
+import com.fintrack.app.presentation.importing.ImportScreen
 import com.fintrack.app.presentation.planning.BudgetFormScreen
 import com.fintrack.app.presentation.planning.GoalFormScreen
 import com.fintrack.app.presentation.planning.PlanningScreen
@@ -157,6 +158,7 @@ private fun FinTrackNavHost(navController: NavHostController, modifier: Modifier
             SettingsScreen(
                 onOpenCategories = { navController.navigate(Routes.CATEGORIES) },
                 onOpenPlanning = { navController.navigate(Routes.PLANNING) },
+                onOpenImport = { navController.navigate(Routes.IMPORT) },
             )
         }
         composable(Routes.PLANNING) {
@@ -168,6 +170,7 @@ private fun FinTrackNavHost(navController: NavHostController, modifier: Modifier
                 onEditGoal = { navController.navigate(Routes.goalEdit(it)) },
             )
         }
+        composable(Routes.IMPORT) { ImportScreen(onBack = back) }
         composable(Routes.BUDGET_NEW) { BudgetFormScreen(onBack = back) }
         composable(Routes.BUDGET_EDIT, arguments = listOf(idArgument(Routes.ARG_BUDGET_ID))) { BudgetFormScreen(onBack = back) }
         composable(Routes.GOAL_NEW) { GoalFormScreen(onBack = back, today = JakartaTime.today(java.time.Clock.systemUTC())) }

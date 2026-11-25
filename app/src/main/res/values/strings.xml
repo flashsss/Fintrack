@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">FinTrack</string>
 
     <!-- Navigation -->
@@ -366,4 +366,100 @@
     <string name="error_parent_is_child">Subkategori tidak bisa menjadi induk.</string>
     <string name="error_parent_self">Kategori tidak bisa menjadi induk dirinya sendiri.</string>
     <string name="error_category_has_children">Kategori yang memiliki subkategori tidak bisa dipindahkan ke bawah kategori lain.</string>
+
+    <!-- CSV import -->
+    <string name="settings_import">Impor CSV</string>
+    <string name="settings_import_description">Tambahkan transaksi dari file CSV ekspor bank atau spreadsheet</string>
+    <string name="import_title">Impor CSV</string>
+    <string name="import_intro">Pilih file CSV berisi transaksi. Anda akan memetakan kolom dan memeriksa hasilnya sebelum ada data yang disimpan.</string>
+    <string name="import_format_note">Baris pertama harus berisi nama kolom. Pemisah koma atau titik koma. Jumlah negatif dicatat sebagai pengeluaran, positif sebagai pemasukan. Transfer tidak dapat diimpor.</string>
+    <string name="import_action_pick">Pilih file CSV</string>
+    <string name="import_action_review">Periksa</string>
+    <string name="import_action_other_file">Pilih file lain</string>
+    <string name="import_action_back_to_mapping">Ubah pemetaan</string>
+    <string name="import_action_import">Impor</string>
+    <string name="import_action_finish">Selesai</string>
+    <string name="import_preview_title">Pratinjau</string>
+    <string name="import_row_line">Baris %1$d</string>
+    <string name="import_column_none">Tidak dipakai</string>
+    <string name="import_column_unnamed">Kolom %1$d</string>
+    <string name="import_field_date">Kolom tanggal</string>
+    <string name="import_field_date_format">Format tanggal</string>
+    <string name="import_field_amount">Kolom jumlah</string>
+    <string name="import_field_description">Kolom keterangan (opsional)</string>
+    <string name="import_field_merchant">Kolom merchant (opsional)</string>
+    <string name="import_field_category">Kolom kategori (opsional)</string>
+    <string name="import_field_wallet">Dompet tujuan impor</string>
+    <string name="import_field_fallback_expense">Kategori pengeluaran bawaan</string>
+    <string name="import_field_fallback_income">Kategori pemasukan bawaan</string>
+    <string name="import_amount_sign_note">Negatif = pengeluaran, positif = pemasukan. Harus rupiah bulat.</string>
+    <string name="import_category_note">Nama yang cocok dengan kategori aktif dipakai; selain itu kategori bawaan.</string>
+    <string name="import_review_note">Memeriksa tidak menyimpan apa pun.</string>
+    <string name="import_date_format_dmy_slash">31/12/2026</string>
+    <string name="import_date_format_dmy_dash" tools:ignore="TypographyDashes">31-12-2026</string>
+    <string name="import_date_format_iso" tools:ignore="TypographyDashes">2026-12-31</string>
+    <string name="import_review_title">Hasil pemeriksaan</string>
+    <string name="import_summary_totals">Akan diimpor: pemasukan %1$s, pengeluaran %2$s</string>
+    <string name="import_failed_title">Baris gagal (tidak diimpor)</string>
+    <string name="import_duplicates_title">Kemungkinan duplikat (tidak diimpor)</string>
+    <plurals name="import_more_rows">
+        <item quantity="one">…dan %1$d baris lainnya</item>
+        <item quantity="other">…dan %1$d baris lainnya</item>
+    </plurals>
+    <string name="import_problem_missing_date">tanggal kosong</string>
+    <string name="import_problem_invalid_date">tanggal tidak sesuai format</string>
+    <string name="import_problem_future_date">tanggal di masa depan</string>
+    <string name="import_problem_missing_amount">jumlah kosong</string>
+    <string name="import_problem_invalid_amount">jumlah bukan angka</string>
+    <string name="import_problem_fractional_amount">jumlah memiliki sen</string>
+    <string name="import_problem_zero_amount">jumlah nol</string>
+    <string name="import_problem_too_large">jumlah terlalu besar</string>
+    <string name="import_duplicate_already_imported">sudah pernah diimpor</string>
+    <string name="import_duplicate_repeated">baris identik muncul sebelumnya di file ini</string>
+    <string name="import_duplicate_possible">ada transaksi dengan tanggal, jenis, dan jumlah sama di dompet ini</string>
+    <string name="import_confirm_title">Impor transaksi?</string>
+    <string name="import_done_note">Transaksi hasil impor dapat diubah atau dihapus satu per satu seperti transaksi lain.</string>
+    <string name="import_error_column_required">Pilih kolom.</string>
+    <string name="import_error_empty">File tidak berisi baris data.</string>
+    <string name="import_error_malformed">File CSV tidak dapat dibaca. Periksa tanda kutip pada file.</string>
+    <string name="import_error_too_large">File lebih dari 5 MB.</string>
+    <string name="import_error_unreadable">File tidak dapat dibuka.</string>
+    <string name="import_error_row_rejected" tools:ignore="PluralsCandidate">Baris %1$d tidak lagi valid (misalnya dompet atau kategori diarsipkan). Tidak ada yang diimpor; periksa ulang.</string>
+    <string name="import_error_row_duplicate" tools:ignore="PluralsCandidate">Baris %1$d sudah diimpor sementara itu. Tidak ada yang diimpor; periksa ulang.</string>
+    <plurals name="import_error_too_many_rows">
+        <item quantity="one">File berisi lebih dari %1$d baris. Bagi file menjadi beberapa bagian.</item>
+        <item quantity="other">File berisi lebih dari %1$d baris. Bagi file menjadi beberapa bagian.</item>
+    </plurals>
+    <plurals name="import_rows_found">
+        <item quantity="one">%1$d baris ditemukan</item>
+        <item quantity="other">%1$d baris ditemukan</item>
+    </plurals>
+    <plurals name="import_summary_ready">
+        <item quantity="one">%1$d baris siap diimpor</item>
+        <item quantity="other">%1$d baris siap diimpor</item>
+    </plurals>
+    <plurals name="import_summary_duplicates">
+        <item quantity="one">%1$d kemungkinan duplikat</item>
+        <item quantity="other">%1$d kemungkinan duplikat</item>
+    </plurals>
+    <plurals name="import_summary_failed">
+        <item quantity="one">%1$d baris gagal</item>
+        <item quantity="other">%1$d baris gagal</item>
+    </plurals>
+    <plurals name="import_include_possible">
+        <item quantity="one">Tetap impor %1$d kemungkinan duplikat (yang sudah pernah diimpor tidak termasuk)</item>
+        <item quantity="other">Tetap impor %1$d kemungkinan duplikat (yang sudah pernah diimpor tidak termasuk)</item>
+    </plurals>
+    <plurals name="import_action_import_count">
+        <item quantity="one">Impor %1$d transaksi</item>
+        <item quantity="other">Impor %1$d transaksi</item>
+    </plurals>
+    <plurals name="import_confirm_message">
+        <item quantity="one">%1$d transaksi akan ditambahkan ke %2$s. Saldo dompet akan berubah.</item>
+        <item quantity="other">%1$d transaksi akan ditambahkan ke %2$s. Saldo dompet akan berubah.</item>
+    </plurals>
+    <plurals name="import_done">
+        <item quantity="one">%1$d transaksi berhasil diimpor.</item>
+        <item quantity="other">%1$d transaksi berhasil diimpor.</item>
+    </plurals>
 </resources>
