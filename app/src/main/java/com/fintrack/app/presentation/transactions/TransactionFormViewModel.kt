@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.fintrack.app.R
 import com.fintrack.app.core.util.AmountInput
 import com.fintrack.app.core.util.JakartaTime
+import com.fintrack.app.data.repository.BudgetAlertChecker
 import com.fintrack.app.data.repository.CategoryRepository
 import com.fintrack.app.data.repository.TransactionRepository
 import com.fintrack.app.data.repository.WalletRepository
@@ -74,6 +75,7 @@ class TransactionFormViewModel @Inject constructor(
     private val transactionRepository: TransactionRepository,
     walletRepository: WalletRepository,
     categoryRepository: CategoryRepository,
+    private val budgetAlertChecker: BudgetAlertChecker,
     clock: Clock,
 ) : ViewModel() {
 
@@ -203,6 +205,7 @@ class TransactionFormViewModel @Inject constructor(
                 } else {
                     transactionRepository.addTransaction(draft)
                 }
+                if (result is WriteResult.Success && transactionId == null) checkBudgets(draft)
                 _state.update { current ->
                     when (result) {
                         is WriteResult.Success -> current.copy(isSaving = false, isSaved = true)
@@ -216,6 +219,19 @@ class TransactionFormViewModel @Inject constructor(
             } catch (error: SQLException) {
                 _state.update { it.copy(isSaving = false, generalError = R.string.error_save_failed) }
             }
+        }
+    }
+
+    /**
+     * Budget alerts for a new expense, run before the form reports success so it completes first.
+     * The transaction is already committed at this point: a database error while checking budgets
+     * must not turn a successful save into "save failed", so it only skips the optional alert.
+     */
+    private suspend fun checkBudgets(draft: TransactionDraft) {
+        try {
+            budgetAlertChecker.onExpenseAdded(draft.type, draft.categoryId, draft.amount, draft.transactionDate)
+        } catch (error: SQLException) {
+            return
         }
     }
 

@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -52,6 +53,7 @@ fun PlanningScreen(
             state.isLoading -> LoadingState(modifier)
             state.loadFailed -> MessageState(stringResource(R.string.error_load_failed), modifier)
             else -> Column(modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
+                BudgetNotificationRow()
                 SectionHeader(
                     stringResource(R.string.budget_section, state.month?.let { JakartaTime.formatMonth(it.atDay(1)) }.orEmpty()),
                     stringResource(R.string.budget_add),
@@ -131,3 +133,29 @@ private fun GoalItem(progress: GoalProgress, onClick: () -> Unit) {
         },
     ) { Text(progress.goal.name) }
 }
+
+/** Shows whether budget notifications can be posted and, on Android 13+, asks for the permission. */
+@Composable
+private fun BudgetNotificationRow() {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    fun granted() = androidx.core.app.NotificationManagerCompat.from(context).areNotificationsEnabled() &&
+        (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU ||
+            androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) ==
+            android.content.pm.PackageManager.PERMISSION_GRANTED)
+    var enabled by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(granted()) }
+    val launcher = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission(),
+    ) { enabled = granted() }
+    Row(Modifier.fillMaxWidth().padding(horizontal = Spacing.screen, vertical = Spacing.small)) {
+        Column(Modifier.weight(1f)) {
+            Text(stringResource(R.string.budget_notifications_title), style = MaterialTheme.typography.titleSmall)
+            NoteText(stringResource(if (enabled) R.string.budget_notifications_on else R.string.budget_notifications_off))
+        }
+        if (!enabled && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            TextButton(onClick = { launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS) }) {
+                Text(stringResource(R.string.budget_notifications_allow))
+            }
+        }
+    }
+}
+

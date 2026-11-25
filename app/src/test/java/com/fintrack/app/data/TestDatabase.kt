@@ -7,6 +7,8 @@ import com.fintrack.app.core.common.TodayProvider
 import com.fintrack.app.data.local.ExpenseDistributionReader
 import com.fintrack.app.data.local.database.FinTrackDatabase
 import com.fintrack.app.data.repository.AnalyticsRepository
+import com.fintrack.app.analytics.metrics.BudgetAlert
+import com.fintrack.app.data.repository.BudgetAlertChecker
 import com.fintrack.app.data.repository.CategoryRepository
 import com.fintrack.app.data.repository.PlanningRepository
 import com.fintrack.app.data.repository.ReportRepository
@@ -31,6 +33,10 @@ class TestDatabase {
     val transactions = TransactionRepository(db, db.transactionDao(), db.walletDao(), db.categoryDao(), clock)
     val reports = ReportRepository(db.reportDao())
     val planning = PlanningRepository(db, db.planningDao(), db.categoryDao(), clock)
+
+    /** Budget alerts delivered by [budgetAlerts], in order. */
+    val deliveredAlerts = mutableListOf<BudgetAlert>()
+    val budgetAlerts = BudgetAlertChecker(planning, reports, categories, { alerts, _ -> deliveredAlerts += alerts }, clock)
     val analytics = AnalyticsRepository(db.analyticsDao(), db, ExpenseDistributionReader(db))
 
     /** Date source without background triggers; the date comes from [clock] at collection start. */

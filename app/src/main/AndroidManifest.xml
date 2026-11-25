@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Budget alerts (Android 13+ asks the user; earlier versions grant it at install). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <!--
         allowBackup=false: financial data must not leave the device through
         Android Auto Backup. An explicit encrypted backup/restore mechanism is

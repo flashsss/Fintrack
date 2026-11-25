@@ -98,7 +98,7 @@
         <item quantity="one">Dasar: %1$s sekarang (%2$d transaksi) vs %3$s sebelumnya.</item>
         <item quantity="other">Dasar: %1$s sekarang (%2$d transaksi) vs %3$s sebelumnya.</item>
     </plurals>
-    <string name="insight_i1_rule">Kenaikan kategori: naik minimal 30%% dan Rp200.000; pengeluaran sebelumnya minimal Rp100.000; minimal 3 transaksi.</string>
+    <string name="insight_i1_rule" formatted="false">Kenaikan kategori: naik minimal 30% dan Rp200.000; pengeluaran sebelumnya minimal Rp100.000; minimal 3 transaksi.</string>
     <string name="insight_i5_text">Rasio tabungan turun %1$s poin, dari %2$s menjadi %3$s.</string>
     <string name="insight_i5_rule">Penurunan rasio tabungan: turun minimal 10 poin; pemasukan periode sebelumnya minimal Rp1.000.000.</string>
     <string name="insight_status_no_finding">Diperiksa, tidak ada temuan.</string>
@@ -164,7 +164,7 @@
         <item quantity="one">Dasar: %1$s dari %2$d transaksi.</item>
         <item quantity="other">Dasar: %1$s dari %2$d transaksi.</item>
     </plurals>
-    <string name="insight_i3_rule">Konsentrasi merchant: satu merchant minimal 30%% dari pengeluaran, minimal 3 transaksi; data merchant tersedia pada minimal 50%% pengeluaran.</string>
+    <string name="insight_i3_rule" formatted="false">Konsentrasi merchant: satu merchant minimal 30% dari pengeluaran, minimal 3 transaksi; data merchant tersedia pada minimal 50% pengeluaran.</string>
     <string name="insight_reason_no_expense">Belum cukup data: tidak ada pengeluaran pada periode ini.</string>
     <string name="insight_reason_low_merchant_coverage">Belum cukup data: kurang dari 50% pengeluaran memiliki data merchant.</string>
     <string name="analysis_tab_trend">Tren</string>
@@ -329,6 +329,16 @@
     <string name="goal_error_target">Target harus lebih dari Rp0.</string>
     <string name="goal_delete_title">Hapus tujuan?</string>
     <string name="goal_delete_message">Tujuan ini akan dihapus dari daftar.</string>
+
+    <string name="notification_channel_budget">Peringatan anggaran</string>
+    <string name="notification_channel_budget_description">Diberitahu saat pengeluaran baru mendekati atau melewati anggaran bulanan.</string>
+    <string name="notification_budget_near_title">Anggaran %1$s hampir habis</string>
+    <string name="notification_budget_over_title">Anggaran %1$s terlampaui</string>
+    <string name="notification_budget_text">%1$s dari %2$s bulan ini</string>
+    <string name="budget_notifications_title">Notifikasi anggaran</string>
+    <string name="budget_notifications_on" formatted="false">Aktif: Anda diberitahu saat transaksi baru membuat anggaran mencapai 80% atau terlampaui.</string>
+    <string name="budget_notifications_off" formatted="false">Nonaktif. Izinkan notifikasi agar diberitahu saat anggaran mencapai 80% atau terlampaui.</string>
+    <string name="budget_notifications_allow">Izinkan</string>
 
     <!-- Settings -->
     <string name="settings_title">Pengaturan</string>

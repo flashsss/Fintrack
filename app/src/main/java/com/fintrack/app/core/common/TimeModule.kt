@@ -21,4 +21,11 @@ object TimeModule {
     @Singleton
     fun provideTodayProvider(clock: Clock, @ApplicationContext context: Context): TodayProvider =
         TodayProvider(clock, systemTimeChanges(context))
+
+    @Provides
+    @Singleton
+    fun provideBudgetNotifications(@ApplicationContext context: Context): BudgetNotifications = BudgetNotifications(context)
+
+    @Provides
+    fun provideBudgetAlertSink(notifications: BudgetNotifications): com.fintrack.app.data.repository.BudgetAlertSink = notifications
 }

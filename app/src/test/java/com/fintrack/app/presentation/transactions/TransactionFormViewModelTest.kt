@@ -51,12 +51,12 @@ class TransactionFormViewModelTest {
 
     private fun newForm(type: TransactionType? = null) = TransactionFormViewModel(
         SavedStateHandle(type?.let { mapOf(Routes.ARG_TYPE to it.name) } ?: emptyMap()),
-        t.transactions, t.wallets, t.categories, t.clock,
+        t.transactions, t.wallets, t.categories, t.budgetAlerts, t.clock
     )
 
     private fun editForm(id: String) = TransactionFormViewModel(
         SavedStateHandle(mapOf(Routes.ARG_TRANSACTION_ID to id)),
-        t.transactions, t.wallets, t.categories, t.clock,
+        t.transactions, t.wallets, t.categories, t.budgetAlerts, t.clock
     )
 
     private suspend fun balances() = t.wallets.observeBalances().first().associate { it.walletId to it.balance }

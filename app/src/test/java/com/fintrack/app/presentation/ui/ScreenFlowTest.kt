@@ -84,7 +84,7 @@ class ScreenFlowTest {
         var saved = false
         val vm = TransactionFormViewModel(
             SavedStateHandle(mapOf(Routes.ARG_TYPE to TransactionType.EXPENSE.name)),
-            t.transactions, t.wallets, t.categories, t.clock,
+            t.transactions, t.wallets, t.categories, t.budgetAlerts, t.clock
         )
         compose.setContent { FinTrackTheme { TransactionFormScreen(onBack = {}, onSaved = { saved = true }, viewModel = vm) } }
 
@@ -110,7 +110,7 @@ class ScreenFlowTest {
 
     @Test
     fun `submitting an empty form shows Indonesian validation messages`() {
-        val vm = TransactionFormViewModel(SavedStateHandle(), t.transactions, t.wallets, t.categories, t.clock)
+        val vm = TransactionFormViewModel(SavedStateHandle(), t.transactions, t.wallets, t.categories, t.budgetAlerts, t.clock)
         compose.setContent { FinTrackTheme { TransactionFormScreen(onBack = {}, onSaved = {}, viewModel = vm) } }
 
         compose.onNodeWithText("Belum ada dompet aktif. Buat dompet terlebih dahulu di menu Dompet.").assertIsDisplayed()

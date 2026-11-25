@@ -141,6 +141,9 @@ class AnalysisScreenTest {
         waitForText("Aturan yang diperiksa")
         waitForText("Belum cukup data: belum ada kategori")
         waitForText("Belum cukup data: pemasukan periode sebelumnya kurang dari Rp1.000.000.")
+        // Rule text is not a format string: it must read "30%", never "30%%".
+        waitForText("naik minimal 30% dan Rp200.000")
+        assertTrue(compose.onAllNodesWithText("%%", substring = true).fetchSemanticsNodes().isEmpty())
     }
 
     @Test
