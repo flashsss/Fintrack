@@ -139,6 +139,34 @@
         <item quantity="one">— (butuh minimal %1$d transaksi)</item>
         <item quantity="other">— (butuh minimal %1$d transaksi)</item>
     </plurals>
+    <string name="analysis_tab_merchant">Merchant</string>
+    <string name="merchant_coverage">%1$s pengeluaran memiliki data merchant.</string>
+    <string name="merchant_coverage_low">Data merchant hanya tersedia pada %1$s pengeluaran, jadi peringkat ini belum mewakili seluruh pengeluaran.</string>
+    <string name="merchant_without">Tanpa merchant</string>
+    <string name="merchant_rank_by_total">Total</string>
+    <string name="merchant_rank_by_count">Frekuensi</string>
+    <plurals name="merchant_detail">
+        <item quantity="one">%1$d transaksi · rata-rata %2$s · %3$s</item>
+        <item quantity="other">%1$d transaksi · rata-rata %2$s · %3$s</item>
+    </plurals>
+    <string name="merchant_new_title">Merchant baru (tidak ada dalam 12 bulan sebelumnya)</string>
+    <string name="merchant_new_empty">Tidak ada merchant baru.</string>
+    <string name="merchant_changes_title">Perubahan terbesar dibanding %1$s</string>
+    <string name="merchant_changes_empty">Belum ada merchant dengan minimal 3 transaksi pada periode sebelumnya.</string>
+    <plurals name="merchant_count_change">
+        <item quantity="one">%1$s · %2$s transaksi</item>
+        <item quantity="other">%1$s · %2$s transaksi</item>
+    </plurals>
+    <string name="merchant_empty">Belum ada pengeluaran dengan merchant pada rentang ini.</string>
+    <string name="merchant_normalization_note">Nama merchant disamakan tanpa membedakan huruf besar-kecil dan spasi berlebih. Nama yang berbeda (mis. "Indomaret" dan "Indomaret Point") tetap dihitung terpisah.</string>
+    <string name="insight_i3_text">%1$s menyerap %2$s pengeluaran periode ini (%3$s).</string>
+    <plurals name="insight_i3_basis">
+        <item quantity="one">Dasar: %1$s dari %2$d transaksi.</item>
+        <item quantity="other">Dasar: %1$s dari %2$d transaksi.</item>
+    </plurals>
+    <string name="insight_i3_rule">Konsentrasi merchant: satu merchant minimal 30%% dari pengeluaran, minimal 3 transaksi; data merchant tersedia pada minimal 50%% pengeluaran.</string>
+    <string name="insight_reason_no_expense">Belum cukup data: tidak ada pengeluaran pada periode ini.</string>
+    <string name="insight_reason_low_merchant_coverage">Belum cukup data: kurang dari 50% pengeluaran memiliki data merchant.</string>
     <string name="analysis_tab_trend">Tren</string>
     <string name="analysis_tab_category">Kategori</string>
     <string name="analysis_category_view_flat">Per kategori</string>

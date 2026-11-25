@@ -1,6 +1,7 @@
 package com.fintrack.app.data.repository
 
 import com.fintrack.app.analytics.metrics.CategoryDayTotal
+import com.fintrack.app.analytics.metrics.RawMerchantTotal
 import com.fintrack.app.analytics.metrics.WeekdayTotal
 import java.time.DayOfWeek
 import com.fintrack.app.core.util.JakartaTime
@@ -49,4 +50,11 @@ class AnalyticsRepository @Inject constructor(
         database.invalidationTracker.createFlow("transactions", emitInitialState = true)
             .conflate()
             .map { distributionReader.read(range.start.toEpochMilli(), range.endExclusive.toEpochMilli()) }
+
+    fun observeExpenseByMerchant(range: DateRange): Flow<List<RawMerchantTotal>> =
+        analyticsDao.observeExpenseByMerchant(range.start.toEpochMilli(), range.endExclusive.toEpochMilli())
+            .map { rows -> rows.map { RawMerchantTotal(it.merchant, it.total, it.count) } }
+
+    fun observeMerchantsSeen(range: DateRange): Flow<List<String>> =
+        analyticsDao.observeMerchantsSeen(range.start.toEpochMilli(), range.endExclusive.toEpochMilli())
 }

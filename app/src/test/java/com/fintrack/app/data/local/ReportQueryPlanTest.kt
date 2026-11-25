@@ -65,4 +65,12 @@ class ReportQueryPlanTest {
         assertTrue(plan, plan.contains("index_transactions_type_transactionDate"))
         assertTrue("count must be an uncorrelated subquery: $plan", !plan.contains("CORRELATED"))
     }
+
+    @Test
+    fun `merchant queries use the type and date index`() {
+        for (sql in listOf(AnalyticsSql.EXPENSE_BY_MERCHANT, AnalyticsSql.MERCHANTS_SEEN)) {
+            val plan = plan(sql, 0L, 10L)
+            assertTrue(plan, plan.contains("index_transactions_type_transactionDate"))
+        }
+    }
 }

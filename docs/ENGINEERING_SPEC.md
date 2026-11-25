@@ -251,6 +251,28 @@ SQL for these queries lives in `ReportSql` constants so tests use the DAO's exac
 devices ship SQLite 3.22 while Robolectric uses a modern SQLite: window functions, `FILTER`,
 `NULLS FIRST/LAST` and upserts are not allowed. Every new DAO query must be added to that test.
 
+### Analisis tab (Phase 4)
+
+Full design, formulas and review decisions: `docs/PHASE_4_TECHNICAL_DESIGN.md` (addendum B is binding).
+
+- Periods: Bulan ini, Bulan lalu, 3/6/12 bulan (including the running month), custom up to 366
+  days; default 3 bulan. Reported span ends today (WIB); comparisons use `PeriodShift`
+  (same elapsed days of the previous month, or the equally long span just before).
+- Tabs: Wawasan (rules I1, I2, I3, I5 with fired / no finding / not-enough-data reasons;
+  thresholds in `InsightRules`), Tren (daily/weekly/monthly buckets, partial buckets marked and
+  excluded from averages), Kategori (flat and parent roll-up; uncategorized and unknown ids
+  outside the hierarchy; labels from the live categories flow), Merchant (normalized by
+  trim + whitespace + case only, coverage shown, new = absent in the previous 365 days; no
+  median), Pola (weekday averages normalized by calendar occurrences; exact distribution).
+- Only the selected tab queries the database. Day and weekday grouping is relative to the range
+  start and requires 24-hour days (`JakartaTime.hasUniformDays`); ranges across the 1964
+  Asia/Jakarta offset change are rejected with an explanation.
+- Exact distribution (`ExpenseDistributionReader`): one statement returns amounts and an
+  uncorrelated COUNT, inside a DEFERRED read transaction; percentiles type 7, population
+  standard deviation (Welford), minimum sample size per statistic.
+- Not implemented on purpose: hour-of-day analysis (stored time is entry time), merchant median,
+  daily-anomaly insight, fuzzy merchant matching, approximate percentiles, covering index.
+
 ## 8. Presentation layer (Phase 2)
 
 - One package per feature under `presentation/` (`transactions`, `wallets`, `categories`,
@@ -265,8 +287,7 @@ devices ship SQLite 3.22 while Robolectric uses a modern SQLite: window function
 - Money is formatted by `formatRupiah` (`Rp1.500.000`); dates by `JakartaTime` (Indonesian locale).
 - Strings live in `res/values/strings.xml` (Bahasa Indonesia). Icons are Material Symbols vector
   drawables (the Compose material-icons artifacts are no longer updated).
-- Beranda is the dashboard and the start destination. Analisis shows an explicit
-  "Belum tersedia" screen until Phase 4.
+- Beranda is the dashboard and the start destination; Analisis is the Phase 4 analytics tab.
 - Charts use Vico 3.3.1 (column chart for daily values, donut for categories), drawn
   statically without animation; chart colors come from `LocalChartColors` (light and dark).
 - Database read failures surface as error states; write failures (`SQLException`) as a form

@@ -21,6 +21,10 @@ import com.fintrack.app.analytics.metrics.CategoryChange
 import com.fintrack.app.analytics.metrics.CategoryTotal
 import com.fintrack.app.analytics.metrics.OutsideHierarchy
 import com.fintrack.app.analytics.metrics.ParentNode
+import com.fintrack.app.analytics.metrics.MerchantAnalysis
+import com.fintrack.app.analytics.metrics.MerchantChange
+import com.fintrack.app.analytics.metrics.MerchantStats
+import com.fintrack.app.analytics.metrics.MerchantSummary
 import com.fintrack.app.analytics.metrics.WeekdayPattern
 import java.time.YearMonth
 import com.fintrack.app.analytics.stats.DistributionSummary
@@ -43,7 +47,7 @@ import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 /** Tabs in display order. Entries are added only when their sub-phase is implemented. */
-enum class AnalysisTab { INSIGHTS, TREND, CATEGORY, PATTERN }
+enum class AnalysisTab { INSIGHTS, TREND, CATEGORY, MERCHANT, PATTERN }
 
 sealed interface TabContent {
     data object Loading : TabContent
@@ -58,7 +62,17 @@ sealed interface TabContent {
     data class Categories(val report: CategoryReport) : TabContent
     data class Insights(val report: InsightReport) : TabContent
     data class Pattern(val report: PatternReport) : TabContent
+    data class Merchants(val report: MerchantReport) : TabContent
 }
+
+data class MerchantReport(
+    val reported: DateSpan,
+    val previous: DateSpan,
+    val summary: MerchantSummary,
+    /** Merchants with no expense in the [MERCHANT_LOOKBACK_DAYS] days before the reported span. */
+    val newMerchants: List<MerchantStats>,
+    val changes: List<MerchantChange>,
+)
 
 data class PatternReport(val reported: DateSpan, val weekdays: WeekdayPattern, val distribution: DistributionSummary)
 
@@ -69,6 +83,7 @@ data class InsightReport(
     val categoryIncreases: RuleOutcome<List<Insight.CategoryIncrease>>,
     val savingRateDrop: RuleOutcome<Insight.SavingRateDrop>,
     val weekendSpending: RuleOutcome<Insight.WeekendSpending>,
+    val merchantConcentration: RuleOutcome<Insight.MerchantConcentration>,
     val categoriesById: Map<String, Category>,
 )
 
@@ -156,6 +171,7 @@ class AnalysisViewModel @Inject constructor(
             AnalysisTab.TREND -> observeTrend(reported, resolved.reportedDays, previous, selection.granularity)
             AnalysisTab.CATEGORY -> observeCategories(reported, previous, resolved.isPartial)
             AnalysisTab.INSIGHTS -> observeInsights(reported, previous)
+            AnalysisTab.MERCHANT -> observeMerchants(reported, previous)
             AnalysisTab.PATTERN -> combine(
                 analyticsRepository.observeExpenseByWeekday(reported.first, reported.last),
                 analyticsRepository.observeExpenseDistribution(JakartaTime.range(reported.first, reported.last)),
@@ -210,7 +226,9 @@ class AnalysisViewModel @Inject constructor(
         )
         val weekendOutcome = analyticsRepository.observeExpenseByWeekday(reported.first, reported.last)
             .map { InsightRules.weekendSpending(WeekdayPattern.of(it, reported.first, reported.last)) }
-        return combine(categoryOutcome, savingOutcome, weekendOutcome, categoryRepository.observeAllCategories()) { increases, saving, weekend, categories ->
+        val merchantOutcome = analyticsRepository.observeExpenseByMerchant(currentRange)
+            .map { InsightRules.merchantConcentration(MerchantAnalysis.summarize(it)) }
+        return combine(categoryOutcome, savingOutcome, weekendOutcome, merchantOutcome, categoryRepository.observeAllCategories()) { increases, saving, weekend, merchant, categories ->
             TabContent.Insights(
                 InsightReport(
                     reported = reported,
@@ -218,7 +236,28 @@ class AnalysisViewModel @Inject constructor(
                     categoryIncreases = increases,
                     savingRateDrop = saving,
                     weekendSpending = weekend,
+                    merchantConcentration = merchant,
                     categoriesById = categories.associateBy { it.id },
+                ),
+            )
+        }
+    }
+
+    private fun observeMerchants(reported: DateSpan, previous: DateSpan): Flow<TabContent> {
+        val lookbackStart = reported.first.minusDays(MERCHANT_LOOKBACK_DAYS)
+        return combine(
+            analyticsRepository.observeExpenseByMerchant(JakartaTime.range(reported.first, reported.last)),
+            analyticsRepository.observeExpenseByMerchant(JakartaTime.range(previous.first, previous.last)),
+            analyticsRepository.observeMerchantsSeen(JakartaTime.range(lookbackStart, reported.first.minusDays(1))),
+        ) { currentRows, previousRows, lookback ->
+            val current = MerchantAnalysis.summarize(currentRows)
+            TabContent.Merchants(
+                MerchantReport(
+                    reported = reported,
+                    previous = previous,
+                    summary = current,
+                    newMerchants = MerchantAnalysis.newMerchants(current, lookback),
+                    changes = MerchantAnalysis.changes(current, MerchantAnalysis.summarize(previousRows)),
                 ),
             )
         }
@@ -256,6 +295,9 @@ class AnalysisViewModel @Inject constructor(
         }
 
     companion object {
+        /** A merchant is "new" when it had no expense in this many days before the period (docs §5.3). */
+        const val MERCHANT_LOOKBACK_DAYS = 365L
+
         /** Design decision D5: three months give enough data for trends without a long query. */
         val DEFAULT_PERIOD: AnalysisPeriod = AnalysisPeriod.LastMonths(3)
     }

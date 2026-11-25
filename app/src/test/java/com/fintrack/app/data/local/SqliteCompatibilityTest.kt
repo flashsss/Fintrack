@@ -74,6 +74,8 @@ class SqliteCompatibilityTest {
         assertEquals(0, run(AnalyticsSql.EXPENSE_BY_CATEGORY_AND_DAY))
         assertEquals(0, run(AnalyticsSql.EXPENSE_BY_WEEKDAY))
         assertEquals(0, run(ExpenseDistributionReader.SQL))
+        assertEquals(0, run(AnalyticsSql.EXPENSE_BY_MERCHANT))
+        assertEquals(0, run(AnalyticsSql.MERCHANTS_SEEN))
     }
 
     @Test

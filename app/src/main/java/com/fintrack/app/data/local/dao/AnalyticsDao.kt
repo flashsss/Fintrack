@@ -10,6 +10,9 @@ data class CategoryDayRow(val categoryId: String?, val dayIndex: Long, val total
 /** Expense on one weekday (0 = Monday .. 6 = Sunday, Asia/Jakarta). */
 data class WeekdayRow(val weekday: Int, val total: Long, val count: Int)
 
+/** Expense per raw merchant text (null = no merchant). Normalization happens in Kotlin. */
+data class MerchantRow(val merchant: String?, val total: Long, val count: Int)
+
 /**
  * Aggregations for the Analisis tab. Same rules as [ReportDao]: half-open UTC range from Jakarta
  * midnights, `+deletedAt` to keep the date indexes, transfers never counted as expense, and only
@@ -29,6 +32,13 @@ interface AnalyticsDao {
      */
     @Query(AnalyticsSql.EXPENSE_BY_WEEKDAY)
     fun observeExpenseByWeekday(startMillis: Long, endMillis: Long, dayMillis: Long, startWeekday: Int): Flow<List<WeekdayRow>>
+
+    @Query(AnalyticsSql.EXPENSE_BY_MERCHANT)
+    fun observeExpenseByMerchant(startMillis: Long, endMillis: Long): Flow<List<MerchantRow>>
+
+    /** Raw merchant texts seen in [startMillis, endMillis), used as the lookback for "new" merchants. */
+    @Query(AnalyticsSql.MERCHANTS_SEEN)
+    fun observeMerchantsSeen(startMillis: Long, endMillis: Long): Flow<List<String>>
 }
 
 object AnalyticsSql {
@@ -53,5 +63,23 @@ object AnalyticsSql {
           AND type = 'EXPENSE'
           AND transactionDate >= :startMillis AND transactionDate < :endMillis
         GROUP BY weekday
+        """
+
+    const val EXPENSE_BY_MERCHANT = """
+        SELECT merchant, SUM(amount) AS total, COUNT(*) AS count
+        FROM transactions
+        WHERE +deletedAt IS NULL
+          AND type = 'EXPENSE'
+          AND transactionDate >= :startMillis AND transactionDate < :endMillis
+        GROUP BY merchant
+        """
+
+    const val MERCHANTS_SEEN = """
+        SELECT DISTINCT merchant
+        FROM transactions
+        WHERE +deletedAt IS NULL
+          AND type = 'EXPENSE'
+          AND merchant IS NOT NULL
+          AND transactionDate >= :startMillis AND transactionDate < :endMillis
         """
 }

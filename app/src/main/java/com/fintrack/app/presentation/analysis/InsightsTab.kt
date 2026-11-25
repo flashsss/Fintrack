@@ -44,16 +44,24 @@ internal fun InsightsTab(report: InsightReport) {
         val increases = (report.categoryIncreases as? RuleOutcome.Fired)?.value.orEmpty()
         val drop = (report.savingRateDrop as? RuleOutcome.Fired)?.value
         val weekend = (report.weekendSpending as? RuleOutcome.Fired)?.value
-        if (increases.isEmpty() && drop == null && weekend == null) NoteText(stringResource(R.string.insights_none_found))
+        val merchant = (report.merchantConcentration as? RuleOutcome.Fired)?.value
+        if (increases.isEmpty() && drop == null && weekend == null && merchant == null) NoteText(stringResource(R.string.insights_none_found))
         increases.forEach { insight -> CategoryIncreaseCard(insight, report) }
         drop?.let { SavingRateDropCard(it) }
         weekend?.let { WeekendCard(it) }
+        merchant?.let {
+            InsightCard(
+                text = stringResource(R.string.insight_i3_text, it.merchant, formatPercent(it.sharePercent), formatRupiah(it.total)),
+                basis = pluralStringResource(R.plurals.insight_i3_basis, it.count, formatRupiah(it.total), it.count),
+            )
+        }
 
         HorizontalDivider()
         Text(stringResource(R.string.insights_rules_title), style = MaterialTheme.typography.titleMedium)
         RuleStatus(stringResource(R.string.insight_i1_rule), report.categoryIncreases)
         RuleStatus(stringResource(R.string.insight_i5_rule), report.savingRateDrop)
         RuleStatus(stringResource(R.string.insight_i2_rule), report.weekendSpending)
+        RuleStatus(stringResource(R.string.insight_i3_rule), report.merchantConcentration)
     }
 }
 
@@ -126,4 +134,6 @@ private val Reason.messageRes: Int
         Reason.SHORT_PERIOD -> R.string.insight_reason_short_period
         Reason.FEW_EXPENSES -> R.string.insight_reason_few_expenses
         Reason.ONE_SIDED_SPENDING -> R.string.insight_reason_one_sided
+        Reason.NO_EXPENSE -> R.string.insight_reason_no_expense
+        Reason.LOW_MERCHANT_COVERAGE -> R.string.insight_reason_low_merchant_coverage
     }

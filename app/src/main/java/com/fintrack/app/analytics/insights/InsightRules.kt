@@ -1,6 +1,7 @@
 package com.fintrack.app.analytics.insights
 
 import com.fintrack.app.analytics.metrics.CategoryTotal
+import com.fintrack.app.analytics.metrics.MerchantSummary
 import com.fintrack.app.analytics.metrics.PeriodTotals
 import com.fintrack.app.analytics.metrics.WeekdayPattern
 
@@ -21,6 +22,11 @@ object InsightRules {
     const val I2_MIN_WEEKDAY_DAYS = 10
     const val I2_MIN_EXPENSES = 20
     const val I2_MIN_RATIO = 1.5
+
+    // I3 — merchant concentration
+    const val I3_MIN_COVERAGE = 50.0
+    const val I3_MIN_COUNT = 3
+    const val I3_MIN_SHARE = 30.0
 
     // I5 — saving-rate drop
     const val I5_MIN_PREVIOUS_INCOME = 1_000_000L
@@ -59,6 +65,14 @@ object InsightRules {
         }
     }
 
+    fun merchantConcentration(summary: MerchantSummary): RuleOutcome<Insight.MerchantConcentration> {
+        val coverage = summary.coveragePercent ?: return RuleOutcome.NotEnoughData(Reason.NO_EXPENSE)
+        if (coverage < I3_MIN_COVERAGE) return RuleOutcome.NotEnoughData(Reason.LOW_MERCHANT_COVERAGE)
+        val top = summary.merchants.firstOrNull { it.count >= I3_MIN_COUNT && summary.share(it)!! >= I3_MIN_SHARE }
+            ?: return RuleOutcome.NoFinding
+        return RuleOutcome.Fired(Insight.MerchantConcentration(top.displayName, summary.share(top)!!, top.count, top.total))
+    }
+
     fun savingRateDrop(current: PeriodTotals, previous: PeriodTotals): RuleOutcome<Insight.SavingRateDrop> {
         if (current.income <= 0L) return RuleOutcome.NotEnoughData(Reason.NO_CURRENT_INCOME)
         if (previous.income < I5_MIN_PREVIOUS_INCOME) return RuleOutcome.NotEnoughData(Reason.LOW_PREVIOUS_INCOME)
@@ -73,13 +87,15 @@ sealed interface Insight {
     /** [ratio] = weekend daily average / weekday daily average; above 1 means weekends cost more. */
     data class WeekendSpending(val weekendDailyAverage: Double, val weekdayDailyAverage: Double, val ratio: Double) : Insight
 
+    data class MerchantConcentration(val merchant: String, val sharePercent: Double, val count: Int, val total: Long) : Insight
+
     data class SavingRateDrop(val currentPercent: Double, val previousPercent: Double) : Insight {
         val pointChange: Double get() = currentPercent - previousPercent
     }
 }
 
 /** Why a rule could not be evaluated. */
-enum class Reason { NO_ELIGIBLE_CATEGORY, NO_CURRENT_INCOME, LOW_PREVIOUS_INCOME, SHORT_PERIOD, FEW_EXPENSES, ONE_SIDED_SPENDING }
+enum class Reason { NO_ELIGIBLE_CATEGORY, NO_CURRENT_INCOME, LOW_PREVIOUS_INCOME, SHORT_PERIOD, FEW_EXPENSES, ONE_SIDED_SPENDING, NO_EXPENSE, LOW_MERCHANT_COVERAGE }
 
 sealed interface RuleOutcome<out T> {
     data class Fired<T>(val value: T) : RuleOutcome<T>

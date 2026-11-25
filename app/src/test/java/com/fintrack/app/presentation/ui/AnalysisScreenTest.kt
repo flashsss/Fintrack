@@ -147,11 +147,19 @@ class AnalysisScreenTest {
     fun `pattern tab shows weekdays normalized by occurrences`() {
         seed()
         show()
-        compose.onNodeWithText("Pola").performClick()
+        compose.onNodeWithText("Pola").performScrollTo().performClick() // fifth tab, beyond the visible tab row
         waitForText("Pengeluaran per hari dalam minggu")
         waitForText("Kamis") // 15 Oct 2026
         waitForText("Akhir pekan vs hari kerja")
         compose.onNodeWithText("Median (P50)").performScrollTo().assertExists()
         compose.onNodeWithText("— (butuh minimal 10 transaksi)", substring = true).performScrollTo().assertExists() // P90 with 2 expenses
+    }
+
+    @Test
+    fun `merchant tab explains missing merchant data`() {
+        seed()
+        show()
+        compose.onNodeWithText("Merchant").performScrollTo().performClick()
+        waitForText("Belum ada pengeluaran dengan merchant pada rentang ini.")
     }
 }
