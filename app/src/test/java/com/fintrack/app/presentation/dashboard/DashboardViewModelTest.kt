@@ -41,7 +41,7 @@ class DashboardViewModelTest {
     @After
     fun tearDown() = t.close()
 
-    private fun viewModel() = DashboardViewModel(t.reports, t.wallets, t.categories, clock)
+    private fun viewModel() = DashboardViewModel(t.reports, t.wallets, t.categories, t.todayProvider(clock))
 
     private suspend fun seed(): Map<String, String> {
         val bca = t.wallets.createWallet("BCA", WalletType.BANK, 10_000_000).requireId()
@@ -148,5 +148,23 @@ class DashboardViewModelTest {
         val entry = viewModel().state.awaitValue { it.hasAnyTransactions }.report!!.breakdown.single()
         assertEquals("Makanan", entry.label)
         assertTrue(entry.isArchived)
+    }
+
+    @Test
+    fun `dashboard moves to the new month when the Jakarta date changes`() = runTest {
+        // 23:00 WIB on 30 Nov 2026.
+        val clock = com.fintrack.app.core.common.MutableClock(Instant.parse("2026-11-30T16:00:00Z"))
+        val changes = kotlinx.coroutines.flow.MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+        val vm = DashboardViewModel(
+            t.reports, t.wallets, t.categories,
+            com.fintrack.app.core.common.TodayProvider(clock, changes, kotlinx.coroutines.flow.emptyFlow()),
+        )
+        assertEquals(LocalDate.of(2026, 11, 1), vm.state.awaitValue { !it.isLoading }.report!!.period.first)
+
+        clock.now = Instant.parse("2026-11-30T17:00:01Z") // 00:00:01 WIB on 1 Dec
+        changes.tryEmit(Unit)
+        val december = vm.state.awaitValue { it.report?.period?.first == LocalDate.of(2026, 12, 1) }.report!!
+        assertEquals(LocalDate.of(2026, 12, 1), december.period.reportedLast)
+        assertEquals(1, december.daily.size)
     }
 }

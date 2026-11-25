@@ -61,7 +61,7 @@ class DashboardScreenTest {
     private var openedWallet: String? = null
 
     private fun show(darkTheme: Boolean = false) {
-        val vm = DashboardViewModel(t.reports, t.wallets, t.categories, clock)
+        val vm = DashboardViewModel(t.reports, t.wallets, t.categories, t.todayProvider(clock))
         compose.setContent {
             FinTrackTheme(darkTheme = darkTheme) {
                 DashboardScreen(

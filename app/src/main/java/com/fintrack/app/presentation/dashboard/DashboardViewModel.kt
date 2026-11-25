@@ -14,6 +14,7 @@ import com.fintrack.app.analytics.period.ReportPeriod
 import com.fintrack.app.analytics.period.ResolvedPeriod
 import com.fintrack.app.analytics.trends.DailyPoint
 import com.fintrack.app.analytics.trends.DailySeries
+import com.fintrack.app.core.common.TodayProvider
 import com.fintrack.app.core.util.JakartaTime
 import com.fintrack.app.data.repository.CategoryRepository
 import com.fintrack.app.data.repository.ReportRepository
@@ -37,7 +38,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import java.time.Clock
 import javax.inject.Inject
 
 /** Current balances; independent of the selected reporting period. */
@@ -81,7 +81,7 @@ class DashboardViewModel @Inject constructor(
     private val reportRepository: ReportRepository,
     walletRepository: WalletRepository,
     categoryRepository: CategoryRepository,
-    private val clock: Clock,
+    todayProvider: TodayProvider,
 ) : ViewModel() {
 
     private val period = MutableStateFlow<ReportPeriod>(ReportPeriod.ThisMonth)
@@ -105,9 +105,8 @@ class DashboardViewModel @Inject constructor(
         }
     }
 
-    private val report: Flow<PeriodReport> = period.flatMapLatest { selected ->
-        // "Today" is taken when the period is (re)selected, in Asia/Jakarta.
-        val today = JakartaTime.today(clock)
+    /** Recomputed when the period changes and when the Jakarta date changes (e.g. after midnight). */
+    private val report: Flow<PeriodReport> = combine(period, todayProvider.today, ::Pair).flatMapLatest { (selected, today) ->
         observeReport(selected, selected.resolve(today), ComparisonSpans.forPeriod(selected, today))
     }
 

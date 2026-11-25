@@ -30,8 +30,34 @@ data class CategoryTotalRow(val categoryId: String?, val total: Long)
 @Dao
 interface ReportDao {
 
-    @Query(
-        """
+    @Query(ReportSql.PERIOD_TOTALS)
+    fun observePeriodTotals(startMillis: Long, endMillis: Long): Flow<PeriodTotalsRow>
+
+    /**
+     * Groups by day offset from [startMillis]. Correct only when every day in the range lasts exactly
+     * [dayMillis] (true for Asia/Jakarta, which has no DST); the repository verifies this.
+     * Days without income or expense are absent from the result.
+     */
+    @Query(ReportSql.DAILY_TOTALS)
+    fun observeDailyTotals(startMillis: Long, endMillis: Long, dayMillis: Long): Flow<List<DailyTotalRow>>
+
+    /** Expense per category id (not name). A null id groups expenses without a category. */
+    @Query(ReportSql.EXPENSE_BY_CATEGORY)
+    fun observeExpenseByCategory(startMillis: Long, endMillis: Long): Flow<List<CategoryTotalRow>>
+
+    @Query(ReportSql.RECENT)
+    fun observeRecent(limit: Int): Flow<List<TransactionEntity>>
+
+    @Query(ReportSql.HAS_TRANSACTIONS)
+    fun observeHasTransactions(): Flow<Boolean>
+}
+
+/**
+ * SQL of [ReportDao], kept as constants so tests can run the exact statements against SQLite 3.21
+ * (the minSdk 29 device ships 3.22; no window functions, FILTER clauses or NULLS FIRST/LAST).
+ */
+object ReportSql {
+    const val PERIOD_TOTALS = """
         SELECT
             COALESCE(SUM(CASE WHEN type = 'INCOME' THEN amount END), 0) AS income,
             COALESCE(SUM(CASE WHEN type = 'EXPENSE' THEN amount END), 0) AS expense,
@@ -40,17 +66,9 @@ interface ReportDao {
         FROM transactions
         WHERE +deletedAt IS NULL
           AND transactionDate >= :startMillis AND transactionDate < :endMillis
-        """,
-    )
-    fun observePeriodTotals(startMillis: Long, endMillis: Long): Flow<PeriodTotalsRow>
-
-    /**
-     * Groups by day offset from [startMillis]. Correct only when every day in the range lasts exactly
-     * [dayMillis] (true for Asia/Jakarta, which has no DST); the repository verifies this.
-     * Days without income or expense are absent from the result.
-     */
-    @Query(
         """
+
+    const val DAILY_TOTALS = """
         SELECT
             (transactionDate - :startMillis) / :dayMillis AS dayIndex,
             COALESCE(SUM(CASE WHEN type = 'INCOME' THEN amount END), 0) AS income,
@@ -61,13 +79,9 @@ interface ReportDao {
           AND transactionDate >= :startMillis AND transactionDate < :endMillis
         GROUP BY dayIndex
         ORDER BY dayIndex
-        """,
-    )
-    fun observeDailyTotals(startMillis: Long, endMillis: Long, dayMillis: Long): Flow<List<DailyTotalRow>>
-
-    /** Expense per category id (not name). A null id groups expenses without a category. */
-    @Query(
         """
+
+    const val EXPENSE_BY_CATEGORY = """
         SELECT categoryId, SUM(amount) AS total
         FROM transactions
         WHERE +deletedAt IS NULL
@@ -75,20 +89,14 @@ interface ReportDao {
           AND transactionDate >= :startMillis AND transactionDate < :endMillis
         GROUP BY categoryId
         ORDER BY total DESC, categoryId
-        """,
-    )
-    fun observeExpenseByCategory(startMillis: Long, endMillis: Long): Flow<List<CategoryTotalRow>>
-
-    @Query(
         """
+
+    const val RECENT = """
         SELECT * FROM transactions
         WHERE +deletedAt IS NULL
         ORDER BY transactionDate DESC, createdAt DESC
         LIMIT :limit
-        """,
-    )
-    fun observeRecent(limit: Int): Flow<List<TransactionEntity>>
+        """
 
-    @Query("SELECT EXISTS(SELECT 1 FROM transactions WHERE deletedAt IS NULL)")
-    fun observeHasTransactions(): Flow<Boolean>
+    const val HAS_TRANSACTIONS = "SELECT EXISTS(SELECT 1 FROM transactions WHERE deletedAt IS NULL)"
 }

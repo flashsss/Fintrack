@@ -123,7 +123,7 @@ class ScreenFlowTest {
 
     @Test
     fun `transaction history shows empty state then formatted rows`() {
-        val vm = TransactionListViewModel(t.transactions, t.wallets, t.categories, t.clock)
+        val vm = TransactionListViewModel(t.transactions, t.wallets, t.categories, t.todayProvider())
         compose.setContent {
             FinTrackTheme { TransactionListScreen(onAddTransaction = {}, onOpenTransaction = {}, viewModel = vm) }
         }

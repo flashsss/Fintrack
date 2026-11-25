@@ -3,6 +3,7 @@ package com.fintrack.app.presentation.transactions
 import android.database.SQLException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.fintrack.app.core.common.TodayProvider
 import com.fintrack.app.core.util.JakartaTime
 import com.fintrack.app.data.repository.CategoryRepository
 import com.fintrack.app.data.repository.TransactionRepository
@@ -18,7 +19,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
-import java.time.Clock
 import java.time.LocalDate
 import java.time.YearMonth
 import javax.inject.Inject
@@ -30,10 +30,10 @@ sealed interface PeriodFilter {
     data object LastMonth : PeriodFilter
     data class Custom(val first: LocalDate, val last: LocalDate) : PeriodFilter
 
-    fun toRange(clock: Clock): DateRange? = when (this) {
+    fun toRange(today: LocalDate): DateRange? = when (this) {
         All -> null
-        ThisMonth -> JakartaTime.month(YearMonth.from(JakartaTime.today(clock)))
-        LastMonth -> JakartaTime.month(YearMonth.from(JakartaTime.today(clock)).minusMonths(1))
+        ThisMonth -> JakartaTime.month(YearMonth.from(today))
+        LastMonth -> JakartaTime.month(YearMonth.from(today).minusMonths(1))
         is Custom -> JakartaTime.range(first, last)
     }
 }
@@ -54,10 +54,10 @@ class TransactionListViewModel @Inject constructor(
     transactionRepository: TransactionRepository,
     walletRepository: WalletRepository,
     categoryRepository: CategoryRepository,
-    private val clock: Clock,
+    todayProvider: TodayProvider,
 ) : ViewModel() {
 
-    private data class Filter(val query: String, val period: PeriodFilter)
+    private data class Filter(val query: String, val period: PeriodFilter, val today: LocalDate)
 
     private val _query = MutableStateFlow("")
     private val period = MutableStateFlow<PeriodFilter>(PeriodFilter.All)
@@ -65,10 +65,10 @@ class TransactionListViewModel @Inject constructor(
     /** Search field value, updated synchronously so typing never waits for the database. */
     val query: StateFlow<String> = _query.asStateFlow()
 
-    val state: StateFlow<TransactionListState> = combine(_query, period, ::Filter)
+    val state: StateFlow<TransactionListState> = combine(_query, period, todayProvider.today, ::Filter)
         .flatMapLatest { current ->
             combine(
-                transactionRepository.observeTransactions(current.query, current.period.toRange(clock)),
+                transactionRepository.observeTransactions(current.query, current.period.toRange(current.today)),
                 walletRepository.observeAllWallets(),
                 categoryRepository.observeAllCategories(),
             ) { transactions, wallets, categories ->

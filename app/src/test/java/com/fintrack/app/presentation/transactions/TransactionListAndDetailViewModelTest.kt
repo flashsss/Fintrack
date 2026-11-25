@@ -49,7 +49,7 @@ class TransactionListAndDetailViewModelTest {
         TransactionDraft(TransactionType.EXPENSE, bca, null, food, 10_000, Instant.parse(at), description),
     ).requireId()
 
-    private fun list() = TransactionListViewModel(t.transactions, t.wallets, t.categories, t.clock)
+    private fun list() = TransactionListViewModel(t.transactions, t.wallets, t.categories, t.todayProvider())
 
     private fun detail(id: String) = TransactionDetailViewModel(
         SavedStateHandle(mapOf(Routes.ARG_TRANSACTION_ID to id)), t.transactions, t.wallets, t.categories,

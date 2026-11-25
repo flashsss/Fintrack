@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!--
+        org.xerial:sqlite-jdbc is pinned on purpose to 3.21.0.1, a test-only SQLite engine older
+        than the SQLite 3.22 shipped with minSdk 29. Upgrading it would defeat
+        SqliteCompatibilityTest, so only this dependency's "newer version" warning is ignored.
+    -->
+    <issue id="NewerVersionAvailable">
+        <ignore regexp="org\.xerial:sqlite-jdbc" />
+    </issue>
+</lint>

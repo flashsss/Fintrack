@@ -1,5 +1,6 @@
 package com.fintrack.app.analytics.metrics
 
+import com.fintrack.app.analytics.period.PeriodShift
 import com.fintrack.app.analytics.period.ReportPeriod
 import java.time.LocalDate
 import java.time.YearMonth
@@ -25,12 +26,12 @@ data class ComparisonSpans(
         fun forPeriod(period: ReportPeriod, today: LocalDate): ComparisonSpans? = when (period) {
             ReportPeriod.ThisMonth -> {
                 val month = YearMonth.from(today)
+                val current = DateSpan(month.atDay(1), today)
+                val previousSpan = PeriodShift.previousMonth(current)
                 val previousMonth = month.minusMonths(1)
-                val elapsedDay = minOf(today.dayOfMonth, previousMonth.lengthOfMonth())
-                val previousSpan = DateSpan(previousMonth.atDay(1), previousMonth.atDay(elapsedDay))
                 val fullPrevious = DateSpan(previousMonth.atDay(1), previousMonth.atEndOfMonth())
                 ComparisonSpans(
-                    current = DateSpan(month.atDay(1), today),
+                    current = current,
                     previous = previousSpan,
                     previousFullMonth = fullPrevious.takeIf { it != previousSpan },
                 )

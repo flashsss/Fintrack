@@ -231,7 +231,10 @@ negative (for example, credit card debt).
     reference, without a percentage.
   - Bulan lalu: full month vs the full month before.
   - Custom range: no monthly comparison (stated in the UI).
-- "Today" is evaluated in `Asia/Jakarta` when the period is selected.
+- "Today" comes from `TodayProvider` (Phase 4.0): always recomputed from the injected `Clock` in
+  `Asia/Jakarta`, on collection start (also on returning to the foreground through
+  `WhileSubscribed`), on system time/date/time-zone broadcasts, and on a best-effort midnight
+  tick. Dashboard and transaction-history periods move to the new day without reselection.
 
 ### Report queries
 
@@ -242,6 +245,11 @@ and `ReportRepository` verifies that every day in the range is 24 hours before q
 Range queries use `+deletedAt IS NULL` so SQLite uses the `transactionDate` /
 `(type, transactionDate)` indexes instead of the low-selectivity `deletedAt` index
 (`ReportQueryPlanTest` guards this). No schema change was needed.
+
+SQL for these queries lives in `ReportSql` constants so tests use the DAO's exact statements.
+`SqliteCompatibilityTest` runs them on SQLite 3.21 (test-only `sqlite-jdbc`), because minSdk 29
+devices ship SQLite 3.22 while Robolectric uses a modern SQLite: window functions, `FILTER`,
+`NULLS FIRST/LAST` and upserts are not allowed. Every new DAO query must be added to that test.
 
 ## 8. Presentation layer (Phase 2)
 
