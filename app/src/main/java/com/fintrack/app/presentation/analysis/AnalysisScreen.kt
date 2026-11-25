@@ -61,6 +61,7 @@ fun AnalysisScreen(viewModel: AnalysisViewModel = hiltViewModel()) {
                 )
                 TabContent.UnsupportedRange -> MessageState(stringResource(R.string.analysis_unsupported_range))
                 is TabContent.Trend -> TrendTab(content.report, viewModel::onGranularityChange)
+                is TabContent.Categories -> CategoryTab(content.report, viewModel::onCategorySelected)
             }
         }
     }
@@ -69,6 +70,7 @@ fun AnalysisScreen(viewModel: AnalysisViewModel = hiltViewModel()) {
 private val AnalysisTab.labelRes: Int
     get() = when (this) {
         AnalysisTab.TREND -> R.string.analysis_tab_trend
+        AnalysisTab.CATEGORY -> R.string.analysis_tab_category
     }
 
 @Composable

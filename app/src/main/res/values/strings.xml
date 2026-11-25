@@ -89,6 +89,20 @@
         <item quantity="other">%1$d bulan</item>
     </plurals>
     <string name="analysis_tab_trend">Tren</string>
+    <string name="analysis_tab_category">Kategori</string>
+    <string name="analysis_category_view_flat">Per kategori</string>
+    <string name="analysis_category_view_parent">Per induk</string>
+    <string name="analysis_category_total">Total pengeluaran</string>
+    <string name="analysis_category_empty">Belum ada pengeluaran pada rentang ini.</string>
+    <string name="analysis_category_unknown">Kategori tidak dikenal</string>
+    <string name="analysis_category_vs_previous">%1$s dibanding %2$s</string>
+    <string name="analysis_category_tap_hint">Ketuk kategori untuk melihat tren bulanannya.</string>
+    <string name="analysis_category_increases">Kenaikan terbesar</string>
+    <string name="analysis_category_decreases">Penurunan terbesar</string>
+    <string name="analysis_category_no_movers">Tidak ada perubahan dibanding periode sebelumnya.</string>
+    <string name="analysis_category_percent_note">Persentase perubahan hanya ditampilkan jika pengeluaran sebelumnya minimal Rp100.000.</string>
+    <string name="analysis_category_monthly_title">Tren bulanan: %1$s</string>
+    <string name="analysis_category_includes_children">termasuk %1$s dari subkategori</string>
     <string name="analysis_not_started">Periode ini belum dimulai, jadi belum ada data untuk dianalisis.</string>
     <plurals name="analysis_too_long">
         <item quantity="one">Rentang terlalu panjang. Analisis tersedia untuk rentang hingga %1$d hari.</item>

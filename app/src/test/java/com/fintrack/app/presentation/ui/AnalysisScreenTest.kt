@@ -47,7 +47,7 @@ class AnalysisScreenTest {
     fun tearDown() = t.close()
 
     private fun show(dark: Boolean = false) {
-        val vm = AnalysisViewModel(t.reports, t.todayProvider(MutableClock(Instant.parse("2026-11-25T03:00:00Z"))))
+        val vm = AnalysisViewModel(t.reports, t.analytics, t.categories, t.todayProvider(MutableClock(Instant.parse("2026-11-25T03:00:00Z"))))
         compose.setContent { FinTrackTheme(darkTheme = dark) { AnalysisScreen(vm) } }
     }
 
@@ -117,5 +117,18 @@ class AnalysisScreenTest {
         waitForText("1–25 Nov 2026 · berjalan")
         waitForText("Rp1.500.000")
         compose.onNodeWithText("Harian").assertExists()
+    }
+
+    @Test
+    fun `category tab ranks categories and shows the monthly trend of a tapped one`() {
+        seed()
+        show()
+        waitForText("Rp8.000.000")
+        compose.onNodeWithText("Kategori").performClick()
+        waitForText("Total pengeluaran")
+        compose.onAllNodesWithText("Makanan")[0].performClick() // ranking row (it also appears under movers)
+        waitForText("Tren bulanan: Makanan")
+        compose.onNodeWithText("Per induk").performClick()
+        waitForText("Rp4.500.000")
     }
 }

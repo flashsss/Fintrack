@@ -2,6 +2,7 @@ package com.fintrack.app.data.local
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.fintrack.app.data.TestDatabase
+import com.fintrack.app.data.local.dao.AnalyticsSql
 import com.fintrack.app.data.local.dao.ReportSql
 import org.junit.After
 import org.junit.Assert.assertTrue
@@ -44,5 +45,11 @@ class ReportQueryPlanTest {
     fun `recent transactions read the date index instead of sorting the table`() {
         val plan = plan(ReportSql.RECENT, 5)
         assertTrue(plan, plan.contains("index_transactions_transactionDate"))
+    }
+
+    @Test
+    fun `category by day uses the type and date index`() {
+        val plan = plan(AnalyticsSql.EXPENSE_BY_CATEGORY_AND_DAY, 0L, 86_400_000L, 10L) // start, dayMillis, end
+        assertTrue(plan, plan.contains("index_transactions_type_transactionDate"))
     }
 }

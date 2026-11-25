@@ -1,5 +1,6 @@
 package com.fintrack.app.data.local
 
+import com.fintrack.app.data.local.dao.AnalyticsSql
 import com.fintrack.app.data.local.dao.ReportSql
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -66,6 +67,11 @@ class SqliteCompatibilityTest {
         assertEquals(0, run(ReportSql.EXPENSE_BY_CATEGORY))
         assertEquals(0, run(ReportSql.RECENT))
         assertEquals(1, run(ReportSql.HAS_TRANSACTIONS))
+    }
+
+    @Test
+    fun `analytics queries run on SQLite 3_21`() {
+        assertEquals(0, run(AnalyticsSql.EXPENSE_BY_CATEGORY_AND_DAY))
     }
 
     @Test

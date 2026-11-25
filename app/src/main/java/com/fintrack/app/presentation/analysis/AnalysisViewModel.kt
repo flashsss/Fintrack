@@ -12,7 +12,16 @@ import com.fintrack.app.analytics.trends.TrendBuckets
 import com.fintrack.app.analytics.trends.TrendReport
 import com.fintrack.app.core.common.TodayProvider
 import com.fintrack.app.core.util.JakartaTime
+import com.fintrack.app.data.repository.AnalyticsRepository
+import com.fintrack.app.data.repository.CategoryRepository
 import com.fintrack.app.data.repository.ReportRepository
+import com.fintrack.app.domain.model.Category
+import com.fintrack.app.analytics.metrics.CategoryAnalysis
+import com.fintrack.app.analytics.metrics.CategoryChange
+import com.fintrack.app.analytics.metrics.CategoryTotal
+import com.fintrack.app.analytics.metrics.OutsideHierarchy
+import com.fintrack.app.analytics.metrics.ParentNode
+import java.time.YearMonth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -29,7 +38,7 @@ import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 /** Tabs in display order. Entries are added only when their sub-phase is implemented. */
-enum class AnalysisTab { TREND }
+enum class AnalysisTab { TREND, CATEGORY }
 
 sealed interface TabContent {
     data object Loading : TabContent
@@ -41,7 +50,30 @@ sealed interface TabContent {
     /** The span crosses a historical Asia/Jakarta offset change (before 1964); days are not 24 h. */
     data object UnsupportedRange : TabContent
     data class Trend(val report: TrendReport) : TabContent
+    data class Categories(val report: CategoryReport) : TabContent
 }
+
+/**
+ * Category analysis of the reported span. Labels, parents and archive state come from
+ * [categoriesById], the live categories table, so renames and moves apply without re-querying sums.
+ */
+data class CategoryReport(
+    val reported: DateSpan,
+    val previous: DateSpan,
+    val totalExpense: Long,
+    val flat: List<CategoryTotal>,
+    val parents: List<ParentNode>,
+    val outside: OutsideHierarchy,
+    val previousById: Map<String, Long>,
+    /** Previous totals rolled up to top-level parents with the current hierarchy. */
+    val previousByParent: Map<String, Long>,
+    val movers: List<CategoryChange>,
+    val categoriesById: Map<String, Category>,
+    /** Monthly expense of [selectedCategoryId] over the reported months; empty when nothing is selected. */
+    val selectedCategoryId: String?,
+    val selectedMonthly: List<Pair<YearMonth, Long>>,
+    val lastMonthIsPartial: Boolean,
+)
 
 data class AnalysisState(
     val period: AnalysisPeriod,
@@ -55,12 +87,15 @@ data class AnalysisState(
 @HiltViewModel
 class AnalysisViewModel @Inject constructor(
     private val reportRepository: ReportRepository,
+    private val analyticsRepository: AnalyticsRepository,
+    private val categoryRepository: CategoryRepository,
     todayProvider: TodayProvider,
 ) : ViewModel() {
 
     private val period = MutableStateFlow<AnalysisPeriod>(DEFAULT_PERIOD)
     private val tab = MutableStateFlow(AnalysisTab.TREND)
     private val granularity = MutableStateFlow(Granularity.MONTHLY)
+    private val selectedCategory = MutableStateFlow<String?>(null)
 
     val selectedPeriod: StateFlow<AnalysisPeriod> = period.asStateFlow()
     val selectedTab: StateFlow<AnalysisTab> = tab.asStateFlow()
@@ -84,6 +119,11 @@ class AnalysisViewModel @Inject constructor(
         granularity.value = value
     }
 
+    /** Shows the monthly trend of [categoryId]; selecting it again clears the selection. */
+    fun onCategorySelected(categoryId: String) {
+        selectedCategory.value = if (selectedCategory.value == categoryId) null else categoryId
+    }
+
     private fun observe(selection: Selection): Flow<AnalysisState> {
         val resolved = selection.period.resolve(selection.today)
         fun state(content: TabContent) = AnalysisState(selection.period, resolved, selection.tab, content)
@@ -95,6 +135,7 @@ class AnalysisViewModel @Inject constructor(
 
         val content: Flow<TabContent> = when (selection.tab) {
             AnalysisTab.TREND -> observeTrend(reported, resolved.reportedDays, previous, selection.granularity)
+            AnalysisTab.CATEGORY -> observeCategories(reported, previous, resolved.isPartial)
         }
         return content
             .map(::state)
@@ -125,6 +166,37 @@ class AnalysisViewModel @Inject constructor(
             )
         }
     }
+
+    private fun observeCategories(reported: DateSpan, previous: DateSpan, isPartial: Boolean): Flow<TabContent> =
+        combine(
+            analyticsRepository.observeExpenseByCategoryAndDay(reported.first, reported.last),
+            reportRepository.observeExpenseByCategory(JakartaTime.range(previous.first, previous.last)),
+            categoryRepository.observeAllCategories(),
+            selectedCategory,
+        ) { days, previousExpenses, categories, selected ->
+            val byId = categories.associateBy { it.id }
+            val flat = CategoryAnalysis.flat(days)
+            val previousById = previousExpenses.mapNotNull { e -> e.categoryId?.let { it to e.total } }.toMap()
+            val months = generateSequence(YearMonth.from(reported.first)) { it.plusMonths(1) }
+                .takeWhile { !it.isAfter(YearMonth.from(reported.last)) }.toList()
+            TabContent.Categories(
+                CategoryReport(
+                    reported = reported,
+                    previous = previous,
+                    totalExpense = days.fold(0L) { sum, d -> Math.addExact(sum, d.total) },
+                    flat = flat,
+                    parents = CategoryAnalysis.byParent(flat, byId),
+                    outside = CategoryAnalysis.outsideHierarchy(days, byId),
+                    previousById = previousById,
+                    previousByParent = CategoryAnalysis.rollUp(previousById, byId),
+                    movers = CategoryAnalysis.movers(flat, previousById),
+                    categoriesById = byId,
+                    selectedCategoryId = selected,
+                    selectedMonthly = if (selected == null) emptyList() else CategoryAnalysis.monthly(days, selected, months),
+                    lastMonthIsPartial = isPartial || reported.last != YearMonth.from(reported.last).atEndOfMonth(),
+                ),
+            )
+        }
 
     companion object {
         /** Design decision D5: three months give enough data for trends without a long query. */

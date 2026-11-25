@@ -2,6 +2,7 @@ package com.fintrack.app.data.local.database
 
 import android.content.Context
 import androidx.room.Room
+import com.fintrack.app.data.local.dao.AnalyticsDao
 import com.fintrack.app.data.local.dao.CategoryDao
 import com.fintrack.app.data.local.dao.ReportDao
 import com.fintrack.app.data.local.dao.TransactionDao
@@ -35,4 +36,7 @@ object DatabaseModule {
 
     @Provides
     fun provideReportDao(database: FinTrackDatabase): ReportDao = database.reportDao()
+
+    @Provides
+    fun provideAnalyticsDao(database: FinTrackDatabase): AnalyticsDao = database.analyticsDao()
 }
