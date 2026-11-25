@@ -48,6 +48,7 @@ class AnalysisScreenTest {
 
     private fun show(dark: Boolean = false) {
         val vm = AnalysisViewModel(t.reports, t.analytics, t.categories, t.todayProvider(MutableClock(Instant.parse("2026-11-25T03:00:00Z"))))
+        vm.onTabChange(com.fintrack.app.presentation.analysis.AnalysisTab.TREND)
         compose.setContent { FinTrackTheme(darkTheme = dark) { AnalysisScreen(vm) } }
     }
 
@@ -130,5 +131,15 @@ class AnalysisScreenTest {
         waitForText("Tren bulanan: Makanan")
         compose.onNodeWithText("Per induk").performClick()
         waitForText("Rp4.500.000")
+    }
+
+    @Test
+    fun `insights tab lists evaluated rules with reasons when data is missing`() {
+        seed()
+        show()
+        compose.onNodeWithText("Wawasan").performClick()
+        waitForText("Aturan yang diperiksa")
+        waitForText("Belum cukup data: belum ada kategori")
+        waitForText("Belum cukup data: pemasukan periode sebelumnya kurang dari Rp1.000.000.")
     }
 }

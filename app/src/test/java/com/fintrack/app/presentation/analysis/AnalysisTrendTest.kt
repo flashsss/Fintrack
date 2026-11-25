@@ -70,7 +70,7 @@ class AnalysisTrendTest {
     @After
     fun tearDown() = t.close()
 
-    private fun viewModel() = AnalysisViewModel(t.reports, t.analytics, t.categories, TodayProvider(clock, changes, emptyFlow()))
+    private fun viewModel() = AnalysisViewModel(t.reports, t.analytics, t.categories, TodayProvider(clock, changes, emptyFlow())).apply { onTabChange(AnalysisTab.TREND) }
 
     private suspend fun AnalysisViewModel.trend() =
         (state.awaitValue { it.content is TabContent.Trend }.content as TabContent.Trend).report

@@ -22,6 +22,9 @@ import com.fintrack.app.analytics.metrics.CategoryTotal
 import com.fintrack.app.analytics.metrics.OutsideHierarchy
 import com.fintrack.app.analytics.metrics.ParentNode
 import java.time.YearMonth
+import com.fintrack.app.analytics.insights.Insight
+import com.fintrack.app.analytics.insights.InsightRules
+import com.fintrack.app.analytics.insights.RuleOutcome
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -38,7 +41,7 @@ import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 /** Tabs in display order. Entries are added only when their sub-phase is implemented. */
-enum class AnalysisTab { TREND, CATEGORY }
+enum class AnalysisTab { INSIGHTS, TREND, CATEGORY }
 
 sealed interface TabContent {
     data object Loading : TabContent
@@ -51,7 +54,17 @@ sealed interface TabContent {
     data object UnsupportedRange : TabContent
     data class Trend(val report: TrendReport) : TabContent
     data class Categories(val report: CategoryReport) : TabContent
+    data class Insights(val report: InsightReport) : TabContent
 }
+
+/** Outcomes of every insight rule for the reported span vs its fair previous span. */
+data class InsightReport(
+    val reported: DateSpan,
+    val previous: DateSpan,
+    val categoryIncreases: RuleOutcome<List<Insight.CategoryIncrease>>,
+    val savingRateDrop: RuleOutcome<Insight.SavingRateDrop>,
+    val categoriesById: Map<String, Category>,
+)
 
 /**
  * Category analysis of the reported span. Labels, parents and archive state come from
@@ -93,7 +106,7 @@ class AnalysisViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val period = MutableStateFlow<AnalysisPeriod>(DEFAULT_PERIOD)
-    private val tab = MutableStateFlow(AnalysisTab.TREND)
+    private val tab = MutableStateFlow(AnalysisTab.INSIGHTS)
     private val granularity = MutableStateFlow(Granularity.MONTHLY)
     private val selectedCategory = MutableStateFlow<String?>(null)
 
@@ -105,7 +118,7 @@ class AnalysisViewModel @Inject constructor(
     /** Only the selected tab's queries run; the state always carries the selection it was built from. */
     val state: StateFlow<AnalysisState> = combine(period, todayProvider.today, tab, granularity, ::Selection)
         .flatMapLatest { selection -> observe(selection) }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AnalysisState(DEFAULT_PERIOD, null, AnalysisTab.TREND, TabContent.Loading))
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AnalysisState(DEFAULT_PERIOD, null, AnalysisTab.INSIGHTS, TabContent.Loading))
 
     fun onPeriodChange(value: AnalysisPeriod) {
         period.value = value
@@ -136,6 +149,7 @@ class AnalysisViewModel @Inject constructor(
         val content: Flow<TabContent> = when (selection.tab) {
             AnalysisTab.TREND -> observeTrend(reported, resolved.reportedDays, previous, selection.granularity)
             AnalysisTab.CATEGORY -> observeCategories(reported, previous, resolved.isPartial)
+            AnalysisTab.INSIGHTS -> observeInsights(reported, previous)
         }
         return content
             .map(::state)
@@ -162,6 +176,29 @@ class AnalysisViewModel @Inject constructor(
                     totals = totals,
                     previous = previous,
                     previousTotals = previousTotals,
+                ),
+            )
+        }
+    }
+
+    private fun observeInsights(reported: DateSpan, previous: DateSpan): Flow<TabContent> {
+        val currentRange = JakartaTime.range(reported.first, reported.last)
+        val previousRange = JakartaTime.range(previous.first, previous.last)
+        return combine(
+            analyticsRepository.observeExpenseByCategoryAndDay(reported.first, reported.last),
+            reportRepository.observeExpenseByCategory(previousRange),
+            reportRepository.observePeriodTotals(currentRange),
+            reportRepository.observePeriodTotals(previousRange),
+            categoryRepository.observeAllCategories(),
+        ) { days, previousExpenses, totals, previousTotals, categories ->
+            val previousById = previousExpenses.mapNotNull { e -> e.categoryId?.let { it to e.total } }.toMap()
+            TabContent.Insights(
+                InsightReport(
+                    reported = reported,
+                    previous = previous,
+                    categoryIncreases = InsightRules.categoryIncreases(CategoryAnalysis.flat(days), previousById),
+                    savingRateDrop = InsightRules.savingRateDrop(totals, previousTotals),
+                    categoriesById = categories.associateBy { it.id },
                 ),
             )
         }
