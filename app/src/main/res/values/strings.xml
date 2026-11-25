@@ -25,9 +25,6 @@
     <string name="error_seed_failed">Kategori bawaan gagal disiapkan. Mulai ulang aplikasi untuk mencoba lagi.</string>
     <string name="field_optional">%1$s (opsional)</string>
 
-    <!-- Unavailable destinations -->
-    <string name="unavailable_title">Belum tersedia</string>
-    <string name="unavailable_analytics">Analisis keuangan belum dibangun. Fitur ini direncanakan pada tahap pengembangan berikutnya.</string>
 
     <!-- Dashboard -->
     <string name="dashboard_title">Beranda</string>
@@ -84,6 +81,39 @@
     <string name="dashboard_recent_title">Transaksi terbaru</string>
     <string name="dashboard_recent_empty">Belum ada transaksi.</string>
     <string name="dashboard_see_all_transactions">Lihat semua transaksi</string>
+
+    <!-- Analysis -->
+    <string name="analysis_title">Analisis</string>
+    <plurals name="analysis_period_months">
+        <item quantity="one">%1$d bulan</item>
+        <item quantity="other">%1$d bulan</item>
+    </plurals>
+    <string name="analysis_tab_trend">Tren</string>
+    <string name="analysis_not_started">Periode ini belum dimulai, jadi belum ada data untuk dianalisis.</string>
+    <plurals name="analysis_too_long">
+        <item quantity="one">Rentang terlalu panjang. Analisis tersedia untuk rentang hingga %1$d hari.</item>
+        <item quantity="other">Rentang terlalu panjang. Analisis tersedia untuk rentang hingga %1$d hari.</item>
+    </plurals>
+    <string name="analysis_unsupported_range">Rentang ini melewati perubahan zona waktu historis Jakarta (sebelum 1964) dan tidak dapat dianalisis per hari. Pilih rentang lain.</string>
+    <string name="analysis_granularity_daily">Harian</string>
+    <string name="analysis_granularity_weekly">Mingguan</string>
+    <string name="analysis_granularity_monthly">Bulanan</string>
+    <plurals name="analysis_daily_unavailable">
+        <item quantity="one">Tampilan harian tersedia untuk rentang hingga %1$d hari.</item>
+        <item quantity="other">Tampilan harian tersedia untuk rentang hingga %1$d hari.</item>
+    </plurals>
+    <string name="analysis_average_daily_expense">Rata-rata pengeluaran harian</string>
+    <string name="analysis_average_daily_note">Total pengeluaran dibagi jumlah hari kalender yang dilaporkan, termasuk hari tanpa transaksi.</string>
+    <string name="analysis_average_full_week">Rata-rata pengeluaran per minggu lengkap</string>
+    <string name="analysis_average_full_month">Rata-rata pengeluaran per bulan lengkap</string>
+    <string name="analysis_average_full_unavailable">Belum ada periode lengkap untuk dirata-ratakan.</string>
+    <string name="analysis_partial_note">* Sebagian: periode belum selesai atau terpotong batas rentang. Tidak dipakai untuk rata-rata.</string>
+    <string name="analysis_trend_chart_description">Grafik batang pemasukan dan pengeluaran %1$s, %2$s.</string>
+    <string name="analysis_trend_empty">Tidak ada pemasukan atau pengeluaran pada rentang ini.</string>
+    <string name="analysis_comparison_title">Dibandingkan periode sebelumnya</string>
+    <string name="analysis_saving_rate_change">Perubahan rasio tabungan</string>
+    <string name="analysis_points">%1$s poin</string>
+    <string name="analysis_saving_rate_change_unavailable">Tidak tersedia: salah satu periode tidak memiliki pemasukan.</string>
 
     <!-- Types -->
     <string name="transaction_type_income">Pemasukan</string>

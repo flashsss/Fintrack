@@ -1,14 +1,10 @@
 package com.fintrack.app.presentation.dashboard
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,25 +23,13 @@ import com.fintrack.app.core.ui.theme.LocalChartColors
 import com.fintrack.app.core.util.JakartaTime
 import com.fintrack.app.core.util.formatPercent
 import com.fintrack.app.core.util.formatRupiah
-import com.fintrack.app.core.util.formatRupiahCompact
+import com.fintrack.app.presentation.common.ColorDot
+import com.fintrack.app.presentation.common.IncomeExpenseColumnChart
+import com.fintrack.app.presentation.common.LegendItem
 import com.fintrack.app.presentation.common.MoneyText
+import com.fintrack.app.presentation.common.NoteText
 import com.fintrack.app.presentation.common.Spacing
-import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
-import com.patrykandpatrick.vico.compose.cartesian.Zoom
-import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
-import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
-import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModel
-import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
-import com.patrykandpatrick.vico.compose.cartesian.data.ColumnCartesianLayerModel
-import com.patrykandpatrick.vico.compose.cartesian.layer.ColumnCartesianLayer
-import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
-import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
-import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
-import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import com.patrykandpatrick.vico.compose.common.Fill
-import com.patrykandpatrick.vico.compose.common.ProvideVicoTheme
-import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
-import com.patrykandpatrick.vico.compose.m3.common.rememberM3VicoTheme
 import com.patrykandpatrick.vico.compose.pie.PieChart
 import com.patrykandpatrick.vico.compose.pie.PieChartHost
 import com.patrykandpatrick.vico.compose.pie.PieSize
@@ -82,55 +66,17 @@ internal fun DailyChartSection(report: PeriodReport) {
                     formatRupiah(totals.income),
                     formatRupiah(totals.expense),
                 )
-                DailyColumnChart(report, colors.income, colors.expense, Modifier.semantics { contentDescription = description })
+                val points = report.daily
+                IncomeExpenseColumnChart(
+                    labels = points.map { it.date.dayOfMonth.toString() },
+                    income = points.map { it.income },
+                    expense = points.map { it.expense },
+                    labelSpacing = if (points.size > 16) 5 else 1,
+                    modifier = Modifier.semantics { contentDescription = description },
+                )
                 NoteText(stringResource(R.string.dashboard_daily_axis_note))
             }
         }
-    }
-}
-
-/** Grouped columns per day: income then expense. X is the day index; labels show the day of month. */
-@Composable
-private fun DailyColumnChart(report: PeriodReport, incomeColor: Color, expenseColor: Color, modifier: Modifier) {
-    val points = report.daily
-    val model = remember(points) {
-        CartesianChartModel(
-            ColumnCartesianLayerModel.build {
-                series(points.map { it.income })
-                series(points.map { it.expense })
-            },
-        )
-    }
-    val dayFormatter = remember(points) {
-        CartesianValueFormatter { _, x, _ -> points.getOrNull(x.toInt())?.date?.dayOfMonth?.toString().orEmpty() }
-    }
-    val amountFormatter = remember { CartesianValueFormatter { _, y, _ -> formatRupiahCompact(y.toLong()) } }
-    val labelSpacing = if (points.size > 16) 5 else 1
-    val columnShape = RoundedCornerShape(topStart = 2.dp, topEnd = 2.dp)
-
-    ProvideVicoTheme(rememberM3VicoTheme()) {
-        CartesianChartHost(
-            chart = rememberCartesianChart(
-                rememberColumnCartesianLayer(
-                    columnProvider = ColumnCartesianLayer.ColumnProvider.series(
-                        rememberLineComponent(Fill(incomeColor), thickness = 4.dp, shape = columnShape),
-                        rememberLineComponent(Fill(expenseColor), thickness = 4.dp, shape = columnShape),
-                    ),
-                    columnCollectionSpacing = 3.dp,
-                    mergeMode = { ColumnCartesianLayer.MergeMode.Grouped(columnSpacing = 1.dp) },
-                ),
-                startAxis = VerticalAxis.rememberStart(valueFormatter = amountFormatter),
-                bottomAxis = HorizontalAxis.rememberBottom(
-                    valueFormatter = dayFormatter,
-                    itemPlacer = remember(labelSpacing) { HorizontalAxis.ItemPlacer.aligned(spacing = { labelSpacing }) },
-                ),
-            ),
-            model = model,
-            // The whole period fits the width: no scrolling or zooming hides days.
-            scrollState = rememberVicoScrollState(scrollEnabled = false),
-            zoomState = rememberVicoZoomState(zoomEnabled = false, initialZoom = Zoom.Content),
-            modifier = modifier.fillMaxWidth().height(220.dp).padding(top = Spacing.small),
-        )
     }
 }
 
@@ -195,18 +141,4 @@ private fun BreakdownRow(entry: BreakdownEntry, color: Color) {
     }
 }
 
-@Composable
-private fun LegendItem(color: Color, label: String, value: String) {
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        ColorDot(color)
-        Column {
-            Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            MoneyText(value, style = MaterialTheme.typography.bodyMedium)
-        }
-    }
-}
 
-@Composable
-private fun ColorDot(color: Color) {
-    Canvas(Modifier.size(10.dp)) { drawCircle(color) }
-}

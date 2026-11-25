@@ -26,7 +26,9 @@ import com.fintrack.app.core.util.JakartaTime
 import com.fintrack.app.core.util.formatPercent
 import com.fintrack.app.core.util.formatRupiah
 import com.fintrack.app.core.util.formatRupiahSigned
+import com.fintrack.app.presentation.common.ComparisonRow
 import com.fintrack.app.presentation.common.MoneyText
+import com.fintrack.app.presentation.common.NoteText
 import com.fintrack.app.presentation.common.Spacing
 import com.fintrack.app.presentation.common.labelRes
 import com.fintrack.app.presentation.transactions.AmountDirection
@@ -155,38 +157,6 @@ internal fun ComparisonSection(comparison: PeriodComparison?) {
 }
 
 @Composable
-private fun ComparisonRow(label: String, change: MetricChange) {
-    Column(Modifier.fillMaxWidth()) {
-        // The percentage describes the whole comparison, so it sits on the metric's title row.
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
-            Text(label, style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
-            val percent = change.percent
-            if (percent is PercentChange.Value) {
-                MoneyText(formatPercent(percent.percent, signed = true), style = MaterialTheme.typography.titleSmall)
-            }
-        }
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
-            LabeledAmount(stringResource(R.string.dashboard_comparison_current), formatRupiah(change.current), Modifier.weight(1f))
-            LabeledAmount(stringResource(R.string.dashboard_comparison_previous), formatRupiah(change.previous), Modifier.weight(1f))
-            LabeledAmount(stringResource(R.string.dashboard_comparison_change), formatRupiahSigned(change.absolute), Modifier.weight(1f))
-        }
-        when (change.percent) {
-            PercentChange.ZeroBaseline -> NoteText(stringResource(R.string.dashboard_comparison_zero_baseline))
-            PercentChange.NegativeBaseline -> NoteText(stringResource(R.string.dashboard_comparison_negative_baseline))
-            is PercentChange.Value -> Unit
-        }
-    }
-}
-
-@Composable
-private fun LabeledAmount(label: String, value: String, modifier: Modifier) {
-    Column(modifier) {
-        Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        MoneyText(value, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.fillMaxWidth())
-    }
-}
-
-@Composable
 internal fun WalletsSection(overview: WalletOverview, onOpenWallet: (String) -> Unit) {
     SectionDivider()
     SectionTitle(stringResource(R.string.dashboard_wallets_title))
@@ -248,7 +218,3 @@ internal fun RecentSection(
     }
 }
 
-@Composable
-internal fun NoteText(text: String, modifier: Modifier = Modifier) {
-    Text(text, modifier = modifier, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-}

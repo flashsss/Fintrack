@@ -30,6 +30,28 @@ object JakartaTime {
         endExclusive = last.plusDays(1).atStartOfDay(ZONE).toInstant(),
     )
 
+    /**
+     * True when every Jakarta day from [first] to [last] lasts exactly 24 hours. SQL that groups by
+     * `(date - start) / 86_400_000` is only valid then. Asia/Jakarta has had no offset change since
+     * 1964; earlier ranges (e.g. across 1 Jan 1964) are rejected instead of being miscounted.
+     */
+    fun hasUniformDays(first: LocalDate, last: LocalDate): Boolean {
+        val range = range(first, last)
+        val days = last.toEpochDay() - first.toEpochDay() + 1
+        return range.endExclusive.toEpochMilli() - range.start.toEpochMilli() == days * DAY_MILLIS
+    }
+
+    const val DAY_MILLIS = 86_400_000L
+
+    private val DAY_MONTH_SHORT = DateTimeFormatter.ofPattern("d MMM", LOCALE)
+    private val MONTH_YEAR_SHORT = DateTimeFormatter.ofPattern("MMM yy", LOCALE)
+
+    /** "5 Okt" for chart labels. */
+    fun formatDayMonth(date: LocalDate): String = DAY_MONTH_SHORT.format(date)
+
+    /** "Okt 26" for chart labels. */
+    fun formatMonthShort(date: LocalDate): String = MONTH_YEAR_SHORT.format(date)
+
     fun month(month: YearMonth): DateRange = range(month.atDay(1), month.atEndOfMonth())
 
     /** Moves [instant] to [date] in Jakarta while keeping its Jakarta time of day. */

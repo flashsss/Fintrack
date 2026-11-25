@@ -30,11 +30,10 @@ class ReportRepository @Inject constructor(private val reportDao: ReportDao) {
      */
     fun observeDailyTotals(first: LocalDate, last: LocalDate): Flow<Map<LocalDate, DailyPoint>> {
         val range = JakartaTime.range(first, last)
-        val days = last.toEpochDay() - first.toEpochDay() + 1
-        check(range.endExclusive.toEpochMilli() - range.start.toEpochMilli() == days * DAY_MILLIS) {
+        check(JakartaTime.hasUniformDays(first, last)) {
             "Daily grouping requires 24-hour days in ${JakartaTime.ZONE} between $first and $last"
         }
-        return reportDao.observeDailyTotals(range.start.toEpochMilli(), range.endExclusive.toEpochMilli(), DAY_MILLIS)
+        return reportDao.observeDailyTotals(range.start.toEpochMilli(), range.endExclusive.toEpochMilli(), JakartaTime.DAY_MILLIS)
             .map { rows ->
                 rows.associate { row ->
                     val date = first.plusDays(row.dayIndex)
@@ -51,8 +50,4 @@ class ReportRepository @Inject constructor(private val reportDao: ReportDao) {
         reportDao.observeRecent(limit).map { rows -> rows.map { it.toDomain() } }
 
     fun observeHasTransactions(): Flow<Boolean> = reportDao.observeHasTransactions()
-
-    private companion object {
-        const val DAY_MILLIS = 86_400_000L
-    }
 }

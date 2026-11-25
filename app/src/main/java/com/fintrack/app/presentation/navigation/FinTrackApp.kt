@@ -32,7 +32,7 @@ import androidx.navigation.navArgument
 import com.fintrack.app.R
 import com.fintrack.app.presentation.categories.CategoryFormScreen
 import com.fintrack.app.presentation.categories.CategoryListScreen
-import com.fintrack.app.presentation.common.UnavailableScreen
+import com.fintrack.app.presentation.analysis.AnalysisScreen
 import com.fintrack.app.presentation.dashboard.DashboardScreen
 import com.fintrack.app.presentation.settings.SettingsScreen
 import com.fintrack.app.presentation.transactions.TransactionDetailScreen
@@ -111,7 +111,7 @@ private fun FinTrackNavHost(navController: NavHostController, modifier: Modifier
                 onSeeAllTransactions = { navController.navigateTopLevel(Routes.TRANSACTIONS) },
             )
         }
-        composable(Routes.ANALYTICS) { UnavailableScreen(R.string.nav_analytics, R.string.unavailable_analytics) }
+        composable(Routes.ANALYTICS) { AnalysisScreen() }
 
         composable(Routes.TRANSACTIONS) {
             TransactionListScreen(
