@@ -1,8 +1,21 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
+
+/**
+ * Supabase project settings come from local.properties (git-ignored), never from the repository:
+ *   supabase.url=https://<project>.supabase.co
+ *   supabase.publishableKey=sb_publishable_...
+ * When absent, cloud sync is hidden and the app works offline only.
+ */
+val localProperties = Properties().apply {
+    rootProject.file("local.properties").takeIf { it.exists() }?.reader()?.use(::load)
+}
+fun localProperty(name: String): String = localProperties.getProperty(name).orEmpty().trim()
 
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.room)
@@ -22,6 +35,8 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "0.1.0"
+        buildConfigField("String", "SUPABASE_URL", "\"${localProperty("supabase.url")}\"")
+        buildConfigField("String", "SUPABASE_PUBLISHABLE_KEY", "\"${localProperty("supabase.publishableKey")}\"")
     }
 
     buildTypes {
@@ -45,6 +60,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     testOptions {
@@ -94,12 +110,24 @@ dependencies {
 
     implementation(libs.kotlinx.coroutines.android)
 
+    // Cloud sync (Phase 6): Supabase Auth + PostgREST over Ktor/OkHttp, background work, small
+    // per-device sync state.
+    implementation(platform(libs.supabase.bom))
+    implementation(libs.supabase.auth)
+    implementation(libs.supabase.postgrest)
+    implementation(libs.ktor.client.okhttp)
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
+    implementation(libs.androidx.datastore.preferences)
+
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.androidx.test.ext.junit)
     testImplementation(libs.androidx.room.testing)
+    testImplementation(libs.androidx.work.testing)
     testImplementation(libs.sqlite.jdbc.legacy)
     // Compose UI tests run on the JVM with Robolectric (no emulator in CI/this environment).
     testImplementation(platform(libs.androidx.compose.bom))

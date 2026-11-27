@@ -4,9 +4,13 @@
         org.xerial:sqlite-jdbc is pinned on purpose to 3.21.0.1, a test-only SQLite engine older
         than the SQLite 3.22 shipped with minSdk 29. Upgrading it would defeat
         SqliteCompatibilityTest, so only this dependency's "newer version" warning is ignored.
+
+        io.ktor:ktor-client-okhttp is pinned to the Ktor version supabase-kt is built against
+        (supabase-kt 3.9.0 → Ktor 3.6.0); it is upgraded together with supabase-kt.
     -->
     <issue id="NewerVersionAvailable">
         <ignore regexp="org\.xerial:sqlite-jdbc" />
+        <ignore regexp="io\.ktor:ktor-client-okhttp" />
     </issue>
     <issue id="GradleDependency">
         <ignore regexp="org\.xerial:sqlite-jdbc" />

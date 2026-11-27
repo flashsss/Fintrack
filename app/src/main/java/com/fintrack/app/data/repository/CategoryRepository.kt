@@ -129,7 +129,9 @@ class CategoryRepository @Inject constructor(
                     isDefault = true,
                     isArchived = false,
                     createdAt = now,
-                    updatedAt = now,
+                    // Oldest possible version: on a second device the synced copy (possibly
+                    // renamed or archived by the user) always wins over a fresh seed.
+                    updatedAt = SEED_UPDATED_AT,
                     deletedAt = null,
                     syncStatus = SyncStatus.PENDING,
                 )
@@ -141,4 +143,9 @@ class CategoryRepository @Inject constructor(
         categoryDao.getById(parentId)?.let {
             ParentCategoryRef(id = it.id, type = it.type, parentId = it.parentId, isArchived = it.isArchived)
         }
+
+    companion object {
+        /** updatedAt of freshly seeded default categories (see docs/PHASE_6_TECHNICAL_DESIGN.md §6.4). */
+        const val SEED_UPDATED_AT = 0L
+    }
 }

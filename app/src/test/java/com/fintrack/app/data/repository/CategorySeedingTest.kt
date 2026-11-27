@@ -67,6 +67,14 @@ class CategorySeedingTest {
     }
 
     @Test
+    fun `seeded defaults carry the oldest version so a synced edit always wins`() = runTest {
+        t.categories.seedDefaultCategories()
+        val rows = t.db.categoryDao().observeAll().first()
+        assertTrue(rows.all { it.updatedAt == CategoryRepository.SEED_UPDATED_AT && it.syncStatus == com.fintrack.app.domain.model.SyncStatus.PENDING })
+        assertTrue(rows.all { it.createdAt == t.clock.millis() })
+    }
+
+    @Test
     fun `default ids are stable across databases`() = runTest {
         t.categories.seedDefaultCategories()
         val other = TestDatabase()

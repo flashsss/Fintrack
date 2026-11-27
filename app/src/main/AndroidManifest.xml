@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Cloud sync with the user's own Supabase project (Phase 6). Nothing else is contacted. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <!-- Budget alerts (Android 13+ asks the user; earlier versions grant it at install). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
