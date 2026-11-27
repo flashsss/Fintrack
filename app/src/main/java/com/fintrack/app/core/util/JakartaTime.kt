@@ -43,6 +43,11 @@ object JakartaTime {
 
     const val DAY_MILLIS = 86_400_000L
 
+    private val TIME_FORMAT = DateTimeFormatter.ofPattern("HH.mm", LOCALE)
+
+    /** "Kamis, 27 November 2026 10.15 WIB" (Indonesian time notation uses a dot). */
+    fun formatDateTime(instant: Instant): String = "${formatDate(instant)} ${TIME_FORMAT.format(instant.atZone(ZONE))} WIB"
+
     private val DAY_MONTH_SHORT = DateTimeFormatter.ofPattern("d MMM", LOCALE)
     private val MONTH_YEAR_SHORT = DateTimeFormatter.ofPattern("MMM yy", LOCALE)
 

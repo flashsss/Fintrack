@@ -22,9 +22,15 @@ sealed interface AuthState {
 
 enum class SignInResult { SUCCESS, INVALID_CREDENTIALS, NETWORK, FAILED }
 
+/** The signed-in account as the sync runner needs it. */
+fun interface SessionUser {
+    /** The user's id once the stored session has been loaded, or null when signed out. */
+    suspend fun currentUserId(): String?
+}
+
 /** One-time email + password sign-in (design §5). Sessions are refreshed by supabase-kt. */
 @Singleton
-class AuthRepository @Inject constructor(private val access: SupabaseAccess) {
+class AuthRepository @Inject constructor(private val access: SupabaseAccess) : SessionUser {
 
     val state: Flow<AuthState> = access.client?.auth?.sessionStatus?.map { status ->
         when (status) {
@@ -39,8 +45,7 @@ class AuthRepository @Inject constructor(private val access: SupabaseAccess) {
     private fun currentUser(): AuthState.SignedIn? =
         access.client?.auth?.currentUserOrNull()?.let { AuthState.SignedIn(it.id, it.email) }
 
-    /** The signed-in user's id once the stored session has been loaded, or null. */
-    suspend fun currentUserId(): String? {
+    override suspend fun currentUserId(): String? {
         val auth = access.client?.auth ?: return null
         auth.awaitInitialization()
         return auth.currentUserOrNull()?.id

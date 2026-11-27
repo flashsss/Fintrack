@@ -463,4 +463,42 @@
         <item quantity="one">%1$d transaksi berhasil diimpor.</item>
         <item quantity="other">%1$d transaksi berhasil diimpor.</item>
     </plurals>
+
+    <!-- Cloud sync -->
+    <string name="settings_sync">Sinkronisasi cloud</string>
+    <string name="settings_sync_description">Cadangkan dan sinkronkan data ke Supabase milik Anda</string>
+    <string name="sync_title">Sinkronisasi cloud</string>
+    <string name="sync_not_configured">Sinkronisasi belum dikonfigurasi pada versi aplikasi ini.</string>
+    <string name="sync_intro">Masuk sekali dengan akun Supabase Anda. Setelah itu data dicadangkan dan disinkronkan otomatis.</string>
+    <string name="sync_sign_in_note">Aplikasi tetap bisa dipakai tanpa internet. Data di perangkat ini tidak dihapus saat masuk atau keluar.</string>
+    <string name="sync_field_email">Email</string>
+    <string name="sync_field_password">Kata sandi</string>
+    <string name="sync_action_sign_in">Masuk</string>
+    <string name="sync_action_now">Sinkronkan sekarang</string>
+    <string name="sync_action_sign_out">Keluar</string>
+    <string name="sync_signed_in_as">Masuk sebagai %1$s</string>
+    <string name="sync_status_running">Sedang menyinkronkan…</string>
+    <string name="sync_status_last">Terakhir sinkron: %1$s</string>
+    <string name="sync_status_never">Belum pernah sinkron.</string>
+    <string name="sync_pending_none">Semua perubahan sudah tersimpan di cloud.</string>
+    <string name="sync_auto_note">Sinkronisasi berjalan otomatis setelah ada perubahan, saat aplikasi dibuka, dan setiap 6 jam bila ada internet.</string>
+    <string name="sync_problem_offline">Tidak ada koneksi ke server. Akan dicoba lagi otomatis.</string>
+    <string name="sync_problem_signed_out">Sesi berakhir. Silakan masuk lagi.</string>
+    <string name="sync_problem_account_mismatch">Data di perangkat ini milik akun lain. Sinkronisasi dihentikan agar data dua akun tidak tercampur.</string>
+    <string name="sync_problem_rejected">Server menolak data. Pastikan skema database Supabase sudah dipasang.</string>
+    <string name="sync_sign_out_title">Keluar dari sinkronisasi?</string>
+    <string name="sync_sign_out_message">Sinkronisasi berhenti di perangkat ini. Data di perangkat dan di cloud tetap ada.</string>
+    <string name="sync_error_email_required">Masukkan email.</string>
+    <string name="sync_error_password_required">Masukkan kata sandi.</string>
+    <string name="sync_error_invalid_credentials">Email atau kata sandi salah.</string>
+    <string name="sync_error_network">Tidak ada koneksi internet. Coba lagi.</string>
+    <string name="sync_error_sign_in_failed">Gagal masuk. Coba lagi nanti.</string>
+    <plurals name="sync_pending">
+        <item quantity="one">%1$d perubahan menunggu dikirim</item>
+        <item quantity="other">%1$d perubahan menunggu dikirim</item>
+    </plurals>
+    <plurals name="sync_rejected_rows">
+        <item quantity="one">%1$d data tidak dapat disinkronkan.</item>
+        <item quantity="other">%1$d data tidak dapat disinkronkan.</item>
+    </plurals>
 </resources>

@@ -22,6 +22,7 @@ class SyncMappingTest {
 
     // encodeDefaults = true like supabase-kt; server_updated_at must still not be sent.
     private val json = Json { encodeDefaults = true }
+    private val lenient = Json { ignoreUnknownKeys = true }
 
     private val wallet = WalletEntity("w-1", "BCA", WalletType.CREDIT_CARD, -1_500_000, "IDR", false, 11, 12, 13, SyncStatus.PENDING)
     private val category = CategoryEntity("c-1", "Listrik", CategoryType.EXPENSE, "c-0", "bolt", "#FF0000", true, true, 21, 22, null, SyncStatus.PENDING)
@@ -60,7 +61,7 @@ class SyncMappingTest {
     fun `rows read from the server keep server_updated_at with microseconds`() {
         val text = """{"id":"w-1","name":"BCA","type":"BANK","initial_balance":0,"currency":"IDR","is_active":true,
             "created_at":1,"updated_at":2,"deleted_at":null,"server_updated_at":"2026-11-27T03:51:12.123456+00:00","user_id":"u"}"""
-        val dto = Json { ignoreUnknownKeys = true }.decodeFromString<WalletDto>(text)
+        val dto = lenient.decodeFromString<WalletDto>(text)
         assertEquals(Instant.parse("2026-11-27T03:51:12.123456Z"), SyncMapping.parseServerTime(dto.serverUpdatedAt!!))
     }
 

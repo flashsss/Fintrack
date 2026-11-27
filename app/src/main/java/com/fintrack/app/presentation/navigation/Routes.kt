@@ -32,6 +32,7 @@ object Routes {
 
     const val PLANNING = "planning"
     const val IMPORT = "import"
+    const val SYNC = "sync"
     const val BUDGET_NEW = "budget/new"
     const val BUDGET_EDIT = "budget/{$ARG_BUDGET_ID}/edit"
     const val GOAL_NEW = "goal/new"

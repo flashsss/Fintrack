@@ -16,7 +16,13 @@ import com.fintrack.app.R
 import com.fintrack.app.presentation.common.FinTopBar
 
 @Composable
-fun SettingsScreen(onOpenCategories: () -> Unit, onOpenPlanning: () -> Unit, onOpenImport: () -> Unit) {
+fun SettingsScreen(
+    onOpenCategories: () -> Unit,
+    onOpenPlanning: () -> Unit,
+    onOpenImport: () -> Unit,
+    /** Null when the build has no Supabase configuration: the item is hidden. */
+    onOpenSync: (() -> Unit)? = null,
+) {
     Scaffold(topBar = { FinTopBar(stringResource(R.string.settings_title)) }) { padding ->
         Column(Modifier.padding(padding).fillMaxSize()) {
             ListItem(
@@ -37,6 +43,14 @@ fun SettingsScreen(onOpenCategories: () -> Unit, onOpenPlanning: () -> Unit, onO
                 supportingContent = { Text(stringResource(R.string.settings_import_description)) },
             ) { Text(stringResource(R.string.settings_import)) }
             HorizontalDivider()
+            if (onOpenSync != null) {
+                ListItem(
+                    onClick = onOpenSync,
+                    leadingContent = { Icon(painterResource(R.drawable.ic_settings), contentDescription = null) },
+                    supportingContent = { Text(stringResource(R.string.settings_sync_description)) },
+                ) { Text(stringResource(R.string.settings_sync)) }
+                HorizontalDivider()
+            }
         }
     }
 }

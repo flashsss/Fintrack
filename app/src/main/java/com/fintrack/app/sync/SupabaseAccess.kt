@@ -21,9 +21,8 @@ class SupabaseAccess(val client: SupabaseClient?) {
     companion object {
         /**
          * Logging is off: supabase-kt would otherwise log requests, which can contain amounts,
-         * descriptions and tokens. [sessionManager] and [codeVerifierCache] null = the library's
-         * default app-private storage (SharedPreferences, set up by App Startup); tests pass
-         * in-memory ones.
+         * descriptions and tokens. The app passes SharedPreferences-backed storage (SyncModule);
+         * tests pass in-memory ones.
          */
         fun create(
             config: SupabaseConfig,
