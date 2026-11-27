@@ -1,6 +1,6 @@
 # FinTrack — Fase 6: Cloud Sync (Supabase) — Technical Design
 
-Status: **Usulan, menunggu persetujuan.** Belum ada implementasi.
+Status: **Disetujui dan diimplementasikan** (langkah 6.0–6.5). Uji end-to-end di perangkat: `docs/PHASE_6_TEST_CHECKLIST.md`.
 Basis kode: commit `9d6b96f` (branch `claude/review-engineering-rules-fu16n6`), schema Room versi 2.
 Acuan: `CLAUDE.md`, `docs/ENGINEERING_SPEC.md`.
 

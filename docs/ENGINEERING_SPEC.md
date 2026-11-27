@@ -29,7 +29,7 @@ detailed reference. If they ever disagree, raise it instead of silently choosing
 | Preferences | DataStore (no `app_settings` table) | When the first preference is needed |
 | Charts | Vico 3.3.1 (`compose-m3`) | Phase 3 |
 | CSV import | Storage Access Framework + Apache Commons CSV 1.14.1 | Phase 5 |
-| Cloud sync | Supabase (Auth, PostgreSQL, RLS), WorkManager | Phase 6 |
+| Cloud sync | Supabase (Auth, PostgreSQL, RLS) via supabase-kt 3.9.0 + Ktor OkHttp, WorkManager 2.12, DataStore 1.3 | Phase 6 |
 
 Dependencies are added only in the phase that uses them. All versions live in
 `gradle/libs.versions.toml`. Do not upgrade dependencies without a clear reason.
@@ -312,6 +312,38 @@ Full design, formulas and review decisions: `docs/PHASE_4_TECHNICAL_DESIGN.md` (
    `TransactionValidator` and its fingerprint re-checked; any failure writes nothing.
    Rows get `source = CSV_IMPORT`, a shared `importBatchId` and the fingerprint.
 
+### Cloud sync (Phase 6)
+
+Design and decisions: `docs/PHASE_6_TECHNICAL_DESIGN.md`. Server schema:
+`supabase/migrations/0001_initial.sql` (setup steps in `supabase/README.md`).
+
+- Room stays the source of truth; the app works fully offline and without an account. Sync is
+  hidden unless `supabase.url` and `supabase.publishableKey` are set in `local.properties`
+  (git-ignored) at build time. Only the publishable key is ever in the app.
+- Push: rows with `syncStatus = PENDING`, per table in foreign-key order, upserted on
+  `(user_id, id)`; marked SYNCED by compare-and-set on `updatedAt`. Rows the server refuses stay
+  pending and are reported.
+- Pull: rows with `server_updated_at ≥ cursor − 5 min`, ordered by (`server_updated_at`, `id`),
+  pages of 500, each page merged in one Room transaction before the cursor moves.
+- Conflicts: last-writer-wins per row on `updatedAt`, on the device (merge) and on the server
+  (trigger ignores older updates). Pulled transactions are re-validated with
+  `TransactionValidator` (archived references allowed as history). No hard deletes anywhere:
+  RLS has no DELETE policy and no DELETE grant.
+- Seeded default categories get `updatedAt = 0`, so a synced edit always wins on a new device.
+- Accounts: one-time email + password sign-in; the first account that syncs is bound to the
+  device and a different account is refused (data never mixes). Sign-out keeps local data.
+- Scheduling (WorkManager, network required): debounced run 10 s after the pending-row count
+  changes, immediate run at app start / sign-in, periodic every 6 hours, retry with backoff when
+  offline.
+- Privacy: supabase-kt logging is off; tokens are in app-private SharedPreferences
+  (`allowBackup=false`); the sync state DataStore holds cursors and statuses only.
+- Tests: engine with two Room databases over an in-memory server that mirrors the SQL trigger;
+  supabase-kt over Ktor `MockEngine` (request shape, error mapping); SQL behavior tests on local
+  PostgreSQL (`supabase/tests/run_local.sh`); JSON keys checked against the migration. Unit tests
+  run with a plain `Application` (`src/test/resources/robolectric.properties`) so the app graph
+  never starts real sync. End-to-end sync against a real project is verified on a device by the
+  user (`docs/PHASE_6_TEST_CHECKLIST.md`).
+
 ## 8. Presentation layer (Phase 2)
 
 - One package per feature under `presentation/` (`transactions`, `wallets`, `categories`,
@@ -339,8 +371,9 @@ Full design, formulas and review decisions: `docs/PHASE_4_TECHNICAL_DESIGN.md` (
   cloud backup and device transfer. An explicit encrypted backup/restore feature is planned.
 - Never log transaction amounts or other sensitive financial details.
 - No hardcoded secrets; `local.properties` and keystores are git-ignored.
-- Supabase access (Phase 6) requires authentication and Row Level Security.
-- Phase 7 review: no `INTERNET` permission (nothing can leave the device); no logging calls in
+- Supabase access (Phase 6) requires authentication and Row Level Security. `INTERNET` is used
+  only for the user's own Supabase project; there is no analytics or other network traffic.
+- Phase 7 review (before Phase 6): no logging calls in
   app code; only the launcher activity is exported; CSV files are read through the system picker
   with a one-time read grant, size-capped before decoding, and never copied.
 - Budget notifications are `VISIBILITY_PRIVATE` with a generic public version, so category
