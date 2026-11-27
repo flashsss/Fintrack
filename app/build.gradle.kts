@@ -128,6 +128,7 @@ dependencies {
     testImplementation(libs.androidx.test.ext.junit)
     testImplementation(libs.androidx.room.testing)
     testImplementation(libs.androidx.work.testing)
+    testImplementation(libs.ktor.client.mock)
     testImplementation(libs.sqlite.jdbc.legacy)
     // Compose UI tests run on the JVM with Robolectric (no emulator in CI/this environment).
     testImplementation(platform(libs.androidx.compose.bom))

@@ -5,12 +5,13 @@
         than the SQLite 3.22 shipped with minSdk 29. Upgrading it would defeat
         SqliteCompatibilityTest, so only this dependency's "newer version" warning is ignored.
 
-        io.ktor:ktor-client-okhttp is pinned to the Ktor version supabase-kt is built against
+        io.ktor:ktor-client-okhttp (and ktor-client-mock for tests) is pinned to the Ktor version supabase-kt is built against
         (supabase-kt 3.9.0 → Ktor 3.6.0); it is upgraded together with supabase-kt.
     -->
     <issue id="NewerVersionAvailable">
         <ignore regexp="org\.xerial:sqlite-jdbc" />
         <ignore regexp="io\.ktor:ktor-client-okhttp" />
+        <ignore regexp="io\.ktor:ktor-client-mock" />
     </issue>
     <issue id="GradleDependency">
         <ignore regexp="org\.xerial:sqlite-jdbc" />
