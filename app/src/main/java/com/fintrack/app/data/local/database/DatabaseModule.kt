@@ -6,6 +6,7 @@ import com.fintrack.app.data.local.dao.AnalyticsDao
 import com.fintrack.app.data.local.dao.CategoryDao
 import com.fintrack.app.data.local.dao.ImportDao
 import com.fintrack.app.data.local.dao.PlanningDao
+import com.fintrack.app.data.local.dao.SyncDao
 import com.fintrack.app.data.local.dao.ReportDao
 import com.fintrack.app.data.local.dao.TransactionDao
 import com.fintrack.app.data.local.dao.WalletDao
@@ -47,4 +48,7 @@ object DatabaseModule {
 
     @Provides
     fun provideImportDao(database: FinTrackDatabase): ImportDao = database.importDao()
+
+    @Provides
+    fun provideSyncDao(database: FinTrackDatabase): SyncDao = database.syncDao()
 }

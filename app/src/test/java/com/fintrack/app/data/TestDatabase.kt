@@ -21,8 +21,7 @@ import java.time.ZoneOffset
 import kotlinx.coroutines.flow.emptyFlow
 
 /** Real Room database in memory (SQLite via Robolectric) with real repositories. */
-class TestDatabase {
-    val clock: Clock = Clock.fixed(Instant.parse("2026-01-01T00:00:00Z"), ZoneOffset.UTC)
+class TestDatabase(val clock: Clock = Clock.fixed(Instant.parse("2026-01-01T00:00:00Z"), ZoneOffset.UTC)) {
 
     val db: FinTrackDatabase = Room.inMemoryDatabaseBuilder(
         ApplicationProvider.getApplicationContext<Context>(),
@@ -34,6 +33,7 @@ class TestDatabase {
     val transactions = TransactionRepository(db, db.transactionDao(), db.walletDao(), db.categoryDao(), clock)
     val reports = ReportRepository(db.reportDao())
     val imports = ImportRepository(db, db.importDao(), db.transactionDao(), db.walletDao(), db.categoryDao(), clock)
+    val syncStore = com.fintrack.app.sync.LocalSyncStore(db, db.syncDao())
     val planning = PlanningRepository(db, db.planningDao(), db.categoryDao(), clock)
 
     /** Budget alerts delivered by [budgetAlerts], in order. */

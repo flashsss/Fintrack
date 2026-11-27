@@ -6,6 +6,7 @@ import com.fintrack.app.data.local.dao.AnalyticsDao
 import com.fintrack.app.data.local.dao.CategoryDao
 import com.fintrack.app.data.local.dao.ImportDao
 import com.fintrack.app.data.local.dao.PlanningDao
+import com.fintrack.app.data.local.dao.SyncDao
 import com.fintrack.app.data.local.dao.ReportDao
 import com.fintrack.app.data.local.dao.TransactionDao
 import com.fintrack.app.data.local.dao.WalletDao
@@ -41,6 +42,7 @@ abstract class FinTrackDatabase : RoomDatabase() {
     abstract fun analyticsDao(): AnalyticsDao
     abstract fun planningDao(): PlanningDao
     abstract fun importDao(): ImportDao
+    abstract fun syncDao(): SyncDao
 
     companion object {
         const val NAME = "fintrack.db"

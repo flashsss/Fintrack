@@ -127,6 +127,7 @@ class AnalysisScreenTest {
         waitForText("Rp8.000.000")
         compose.onNodeWithText("Kategori").performClick()
         waitForText("Total pengeluaran")
+        waitForText("Makanan") // rows load after the header
         compose.onAllNodesWithText("Makanan")[0].performClick() // ranking row (it also appears under movers)
         waitForText("Tren bulanan: Makanan")
         compose.onNodeWithText("Per induk").performClick()
