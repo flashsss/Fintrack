@@ -34,6 +34,7 @@
     <string name="dashboard_period_not_started">Periode ini belum dimulai, jadi belum ada data untuk dilaporkan.</string>
     <string name="dashboard_empty">Belum ada data keuangan. Tambahkan dompet di menu Dompet, lalu catat transaksi pertama.</string>
     <string name="dashboard_balance_title">Total saldo dompet aktif</string>
+    <string name="dashboard_balance_negative">Saldo total minus</string>
     <plurals name="dashboard_balance_note">
         <item quantity="one">Saldo saat ini dari %1$d dompet aktif, tidak bergantung pada periode. Ini bukan kekayaan bersih: dompet yang diarsipkan serta aset dan utang di luar aplikasi tidak dihitung.</item>
         <item quantity="other">Saldo saat ini dari %1$d dompet aktif, tidak bergantung pada periode. Ini bukan kekayaan bersih: dompet yang diarsipkan serta aset dan utang di luar aplikasi tidak dihitung.</item>

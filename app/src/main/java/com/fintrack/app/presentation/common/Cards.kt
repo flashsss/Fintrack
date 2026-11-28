@@ -12,6 +12,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
@@ -25,6 +28,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -136,9 +141,16 @@ fun <T> PeriodPills(
  * and wallets are recognisable at a glance. Decorative: the label is always shown next to it.
  */
 @Composable
-fun LetterChip(label: String, modifier: Modifier = Modifier, colorIndex: Int = stableIndex(label), size: Dp = 40.dp) {
+fun LetterChip(
+    label: String,
+    modifier: Modifier = Modifier,
+    colorIndex: Int = stableIndex(label),
+    size: Dp = 40.dp,
+    /** Overrides the palette, e.g. a neutral tone for transfers. */
+    color: Color? = null,
+) {
     val palette = LocalChartColors.current.categories
-    val color = palette[Math.floorMod(colorIndex, palette.size)]
+    val color = color ?: palette[Math.floorMod(colorIndex, palette.size)]
     Box(
         modifier.size(size).clip(RoundedCornerShape(Corners.chip)).background(color.copy(alpha = 0.16f)),
         contentAlignment = Alignment.Center,
@@ -151,8 +163,18 @@ fun LetterChip(label: String, modifier: Modifier = Modifier, colorIndex: Int = s
     }
 }
 
-/** Same label → same color on every screen and device. */
-fun stableIndex(label: String): Int = label.trim().lowercase().hashCode()
+/** Same label → same color on every screen and device (bits mixed so similar labels spread). */
+fun stableIndex(label: String): Int {
+    var h = label.trim().lowercase().hashCode()
+    h = (h xor (h ushr 16)) * 0x45d9f3b
+    h = (h xor (h ushr 16)) * 0x45d9f3b
+    return h xor (h ushr 16)
+}
+
+/** Chip for transfers: a neutral ⇄, never a category color (transfers are not income or expense). */
+@Composable
+fun TransferChip(modifier: Modifier = Modifier) =
+    LetterChip("⇄", modifier, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
 /** Rounded progress bar; [fraction] is clamped to 0..1, the label carries the exact figure. */
 @Composable
@@ -160,5 +182,25 @@ fun ProgressBar(fraction: Float, color: Color, modifier: Modifier = Modifier, he
     val track = LocalFinColors.current.track
     Box(modifier.fillMaxWidth().height(height).clip(CircleShape).background(track)) {
         Box(Modifier.fillMaxWidth(fraction.coerceIn(0f, 1f)).height(height).clip(CircleShape).background(color))
+    }
+}
+
+/** Large screen title for top-level tabs (replaces a plain top app bar). */
+@Composable
+fun ScreenHeader(title: String, modifier: Modifier = Modifier, actions: @Composable RowScope.() -> Unit = {}) {
+    Row(
+        modifier
+            .fillMaxWidth()
+            .windowInsetsPadding(WindowInsets.statusBars)
+            .padding(start = 20.dp, end = 12.dp, top = 16.dp, bottom = 12.dp)
+            .heightIn(min = 48.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            title,
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.weight(1f).semantics { heading() },
+        )
+        actions()
     }
 }

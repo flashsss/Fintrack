@@ -23,7 +23,10 @@ import com.fintrack.app.core.ui.theme.LocalChartColors
 import com.fintrack.app.core.util.JakartaTime
 import com.fintrack.app.core.util.formatPercent
 import com.fintrack.app.core.util.formatRupiah
+import com.fintrack.app.presentation.common.AppCard
+import com.fintrack.app.presentation.common.CardHeader
 import com.fintrack.app.presentation.common.ColorDot
+import com.fintrack.app.presentation.common.ProgressBar
 import com.fintrack.app.presentation.common.IncomeExpenseColumnChart
 import com.fintrack.app.presentation.common.LegendItem
 import com.fintrack.app.presentation.common.MoneyText
@@ -40,9 +43,8 @@ import com.patrykandpatrick.vico.compose.pie.rememberPieChart
 internal fun DailyChartSection(report: PeriodReport) {
     val totals = report.totals ?: return
     val colors = LocalChartColors.current
-    SectionDivider()
-    SectionTitle(stringResource(R.string.dashboard_daily_title))
-    Column(Modifier.fillMaxWidth().padding(horizontal = Spacing.screen, vertical = Spacing.small)) {
+    AppCard {
+        CardHeader(stringResource(R.string.dashboard_daily_title))
         Row(horizontalArrangement = Arrangement.spacedBy(Spacing.field)) {
             LegendItem(colors.income, stringResource(R.string.dashboard_income), formatRupiah(totals.income))
             LegendItem(colors.expense, stringResource(R.string.dashboard_expense), formatRupiah(totals.expense))
@@ -82,12 +84,11 @@ internal fun DailyChartSection(report: PeriodReport) {
 
 @Composable
 internal fun BreakdownSection(entries: List<BreakdownEntry>) {
-    SectionDivider()
-    SectionTitle(stringResource(R.string.dashboard_breakdown_title))
-    Column(Modifier.fillMaxWidth().padding(horizontal = Spacing.screen, vertical = Spacing.small)) {
+    AppCard {
+        CardHeader(stringResource(R.string.dashboard_breakdown_title))
         if (entries.isEmpty()) {
             NoteText(stringResource(R.string.dashboard_breakdown_empty))
-            return@Column
+            return@AppCard
         }
         val colors = LocalChartColors.current
         val sliceColors = entries.mapIndexed { index, entry ->
@@ -96,7 +97,7 @@ internal fun BreakdownSection(entries: List<BreakdownEntry>) {
         val total = entries.sumOf { it.slice.total }
         val description = stringResource(R.string.dashboard_breakdown_chart_description, formatRupiah(total))
         DonutChart(entries.map { it.slice }, sliceColors, Modifier.semantics { contentDescription = description })
-        Column(Modifier.padding(top = Spacing.small), verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             entries.forEachIndexed { index, entry -> BreakdownRow(entry, sliceColors[index]) }
         }
     }
@@ -128,15 +129,20 @@ private fun BreakdownRow(entry: BreakdownEntry, color: Color) {
     }
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
         ColorDot(color)
-        Column(Modifier.weight(1f)) {
-            Text(label, style = MaterialTheme.typography.bodyLarge)
-            if (entry.isArchived) {
-                Text(stringResource(R.string.state_archived), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(label, style = MaterialTheme.typography.titleSmall)
+                    if (entry.isArchived) {
+                        Text(stringResource(R.string.state_archived), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+                Column(horizontalAlignment = Alignment.End) {
+                    MoneyText(formatRupiah(slice.total), style = MaterialTheme.typography.titleSmall)
+                    Text(formatPercent(slice.percent), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
             }
-        }
-        Column(horizontalAlignment = Alignment.End) {
-            MoneyText(formatRupiah(slice.total), style = MaterialTheme.typography.bodyLarge)
-            Text(formatPercent(slice.percent), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            ProgressBar((slice.percent / 100).toFloat(), color, height = 6.dp)
         }
     }
 }
