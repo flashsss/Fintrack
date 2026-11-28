@@ -73,6 +73,19 @@ class AccessibilityChecksTest {
         }
     }
 
+    /**
+     * Lets the screen's initial Room queries finish, so none is still running when the test closes
+     * the database (that race made this test flaky).
+     */
+    private fun settle() {
+        val until = System.currentTimeMillis() + 300
+        while (System.currentTimeMillis() < until) {
+            shadowOf(Looper.getMainLooper()).idle()
+            compose.waitForIdle()
+            Thread.sleep(10)
+        }
+    }
+
     /** Problems found in the merged semantics tree, as readable lines. */
     private fun problems(): List<String> {
         val found = mutableListOf<String>()
@@ -94,7 +107,7 @@ class AccessibilityChecksTest {
     private fun assertAccessible(waitFor: String? = null, content: @Composable () -> Unit) {
         compose.setContent { FinTrackTheme { content() } }
         if (waitFor != null) waitForText(waitFor)
-        compose.waitForIdle()
+        settle()
         assertEquals(emptyList<String>(), problems())
     }
 

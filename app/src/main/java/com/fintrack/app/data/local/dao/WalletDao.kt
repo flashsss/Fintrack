@@ -18,6 +18,10 @@ interface WalletDao {
     @Update
     suspend fun update(wallet: WalletEntity)
 
+    /** Non-deleted transactions that use the wallet as source or transfer destination. */
+    @Query("SELECT COUNT(*) FROM transactions WHERE deletedAt IS NULL AND (walletId = :id OR destinationWalletId = :id)")
+    suspend fun activeTransactionCount(id: String): Int
+
     @Query("SELECT * FROM wallets WHERE id = :id AND deletedAt IS NULL")
     suspend fun getById(id: String): WalletEntity?
 

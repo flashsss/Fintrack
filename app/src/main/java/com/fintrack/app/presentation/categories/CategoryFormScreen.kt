@@ -125,6 +125,12 @@ fun CategoryFormScreen(
                         Text(stringResource(R.string.action_archive))
                     }
                 }
+                if (state.isEdit && state.isArchived) {
+                    OutlinedButton(onClick = viewModel::unarchive, modifier = Modifier.fillMaxWidth()) {
+                        Icon(painterResource(R.drawable.ic_unarchive), contentDescription = null)
+                        Text(stringResource(R.string.action_unarchive))
+                    }
+                }
             }
         }
     }

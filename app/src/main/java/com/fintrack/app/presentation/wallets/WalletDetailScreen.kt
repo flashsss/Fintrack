@@ -4,19 +4,23 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -39,8 +43,12 @@ fun WalletDetailScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val archiveError by viewModel.archiveError.collectAsStateWithLifecycle()
+    val deleteBlockedBy by viewModel.deleteBlockedBy.collectAsStateWithLifecycle()
+    val deleted by viewModel.deleted.collectAsStateWithLifecycle()
     var confirmArchive by rememberSaveable { mutableStateOf(false) }
+    var confirmDelete by rememberSaveable { mutableStateOf(false) }
     val wallet = state.wallet
+    LaunchedEffect(deleted) { if (deleted) onBack() }
 
     Scaffold(
         topBar = {
@@ -56,6 +64,13 @@ fun WalletDetailScreen(
                             IconButton(onClick = { confirmArchive = true }) {
                                 Icon(painterResource(R.drawable.ic_archive), stringResource(R.string.action_archive))
                             }
+                        } else {
+                            IconButton(onClick = viewModel::unarchive) {
+                                Icon(painterResource(R.drawable.ic_unarchive), stringResource(R.string.action_unarchive))
+                            }
+                        }
+                        IconButton(onClick = { confirmDelete = true }) {
+                            Icon(painterResource(R.drawable.ic_delete), stringResource(R.string.action_delete))
                         }
                     }
                 },
@@ -126,6 +141,34 @@ fun WalletDetailScreen(
                 viewModel.archive()
             },
             onDismiss = { confirmArchive = false },
+        )
+    }
+    if (confirmDelete) {
+        ConfirmDialog(
+            title = stringResource(R.string.wallet_delete_title),
+            message = stringResource(R.string.wallet_delete_message),
+            confirmLabel = stringResource(R.string.action_delete),
+            onConfirm = {
+                confirmDelete = false
+                viewModel.delete()
+            },
+            onDismiss = { confirmDelete = false },
+        )
+    }
+    deleteBlockedBy?.let { count ->
+        AlertDialog(
+            onDismissRequest = viewModel::dismissDeleteBlocked,
+            title = { Text(stringResource(R.string.wallet_delete_blocked_title)) },
+            text = { Text(pluralStringResource(R.plurals.wallet_delete_blocked_message, count, count)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.dismissDeleteBlocked()
+                    if (wallet?.isActive == true) confirmArchive = true
+                }) { Text(stringResource(if (wallet?.isActive == true) R.string.action_archive else R.string.action_close)) }
+            },
+            dismissButton = if (wallet?.isActive == true) {
+                { TextButton(onClick = viewModel::dismissDeleteBlocked) { Text(stringResource(R.string.action_cancel)) } }
+            } else null,
         )
     }
 }

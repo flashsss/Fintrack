@@ -86,4 +86,18 @@ class CategoryRepositoryTest {
         assertEquals(CategoryType.EXPENSE, updated.type)
         assertEquals("restaurant", updated.icon)
     }
+
+    @Test
+    fun `archived categories can be restored, subcategories only after their parent`() = runTest {
+        val parent = t.categories.createCategory("Rumah", CategoryType.EXPENSE, null, null, null).requireId()
+        val child = t.categories.createCategory("Listrik", CategoryType.EXPENSE, parent, null, null).requireId()
+        t.categories.archiveCategory(child).requireId()
+        t.categories.archiveCategory(parent).requireId()
+
+        assertEquals(WriteResult.Invalid(listOf(CategoryValidationError.ParentArchived)), t.categories.unarchiveCategory(child))
+        t.categories.unarchiveCategory(parent).requireId()
+        t.categories.unarchiveCategory(child).requireId()
+        val selectable = t.categories.observeSelectableCategories(CategoryType.EXPENSE).first().map { it.id }.toSet()
+        assertEquals(setOf(parent, child), selectable)
+    }
 }

@@ -266,4 +266,18 @@ class SyncEngineTest {
         assertEquals(TransactionType.TRANSFER, transfer.type)
         assertNull(transfer.categoryId)
     }
+
+    @Test
+    fun `a deleted wallet disappears on the other device`() = runTest {
+        val spare = a.wallets.createWallet("Cadangan", WalletType.CASH, 10_000).requireId()
+        syncA.run()
+        syncB.run()
+        assertEquals(1, b.wallets.observeAllWallets().first().size)
+        tick(clockA)
+        a.wallets.deleteWallet(spare).requireId()
+        syncA.run()
+        syncB.run()
+        assertTrue(b.wallets.observeAllWallets().first().isEmpty())
+        assertTrue(b.wallets.observeBalances().first().isEmpty())
+    }
 }

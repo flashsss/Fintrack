@@ -19,6 +19,8 @@ import javax.inject.Singleton
 
 sealed interface WalletValidationError {
     data object NameBlank : WalletValidationError
+    /** The wallet still has [count] transactions; deleting it would erase their history. */
+    data class HasTransactions(val count: Int) : WalletValidationError
 }
 
 @Singleton
@@ -93,6 +95,31 @@ class WalletRepository @Inject constructor(
             walletDao.update(
                 existing.copy(isActive = false, updatedAt = clock.millis(), syncStatus = SyncStatus.PENDING),
             )
+            WriteResult.Success(id)
+        }
+
+    /** Makes an archived wallet selectable for new transactions again. */
+    suspend fun unarchiveWallet(id: String): WriteResult<WalletValidationError> =
+        database.withTransaction {
+            val existing = walletDao.getById(id) ?: return@withTransaction WriteResult.NotFound
+            if (!existing.isActive) {
+                walletDao.update(existing.copy(isActive = true, updatedAt = clock.millis(), syncStatus = SyncStatus.PENDING))
+            }
+            WriteResult.Success(id)
+        }
+
+    /**
+     * Soft-deletes a wallet that no transaction uses (deletedAt; synced like other deletions).
+     * A wallet with transactions is refused: its history must be preserved, so it can only be
+     * archived. The check and the deletion run in one transaction.
+     */
+    suspend fun deleteWallet(id: String): WriteResult<WalletValidationError> =
+        database.withTransaction {
+            val existing = walletDao.getById(id) ?: return@withTransaction WriteResult.NotFound
+            val used = walletDao.activeTransactionCount(id)
+            if (used > 0) return@withTransaction WriteResult.Invalid(listOf(WalletValidationError.HasTransactions(used)))
+            val now = clock.millis()
+            walletDao.update(existing.copy(deletedAt = now, updatedAt = now, syncStatus = SyncStatus.PENDING))
             WriteResult.Success(id)
         }
 

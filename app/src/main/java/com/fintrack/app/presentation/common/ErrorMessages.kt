@@ -50,4 +50,5 @@ val CategoryValidationError.messageRes: Int
 val WalletValidationError.messageRes: Int
     get() = when (this) {
         WalletValidationError.NameBlank -> R.string.error_name_required
+        is WalletValidationError.HasTransactions -> R.string.wallet_delete_blocked
     }

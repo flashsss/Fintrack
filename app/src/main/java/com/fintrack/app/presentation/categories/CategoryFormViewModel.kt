@@ -154,6 +154,21 @@ class CategoryFormViewModel @Inject constructor(
         }
     }
 
+    fun unarchive() {
+        val id = categoryId ?: return
+        viewModelScope.launch {
+            try {
+                when (val result = categoryRepository.unarchiveCategory(id)) {
+                    is WriteResult.Success -> _state.update { it.copy(isArchived = false, generalError = null) }
+                    WriteResult.NotFound -> _state.update { it.copy(notFound = true) }
+                    is WriteResult.Invalid -> _state.update { it.copy(generalError = R.string.category_unarchive_parent_archived) }
+                }
+            } catch (error: SQLException) {
+                _state.update { it.copy(generalError = R.string.error_save_failed) }
+            }
+        }
+    }
+
     companion object {
         /**
          * Active top-level categories of [type], excluding [selfId]. The current parent stays

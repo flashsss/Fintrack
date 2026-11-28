@@ -27,6 +27,8 @@ import com.fintrack.app.presentation.transactions.TransactionFormScreen
 import com.fintrack.app.presentation.transactions.TransactionFormViewModel
 import com.fintrack.app.presentation.transactions.TransactionListScreen
 import com.fintrack.app.presentation.transactions.TransactionListViewModel
+import com.fintrack.app.presentation.wallets.WalletDetailScreen
+import com.fintrack.app.presentation.wallets.WalletDetailViewModel
 import com.fintrack.app.presentation.wallets.WalletListScreen
 import com.fintrack.app.presentation.wallets.WalletListViewModel
 import kotlinx.coroutines.flow.first
@@ -192,5 +194,49 @@ class ScreenFlowTest {
         waitForText("Makanan dan minuman")
         compose.onNodeWithText("Pemasukan").performClick()
         waitForText("Gaji")
+    }
+
+    @Test
+    fun `an archived wallet is restored, a used wallet is not deleted, an unused one is`() {
+        val (used, spare) = runBlocking {
+            val used = t.wallets.createWallet("BCA", WalletType.BANK, 0).requireId()
+            val food = t.categories.createCategory("Makanan", CategoryType.EXPENSE, null, null, null).requireId()
+            t.transactions.addTransaction(TransactionDraft(TransactionType.EXPENSE, used, null, food, 1_000, Instant.EPOCH)).requireId()
+            t.wallets.archiveWallet(used).requireId()
+            used to t.wallets.createWallet("Salah buat", WalletType.CASH, 0).requireId()
+        }
+        var closed = false
+        val usedVm = WalletDetailViewModel(SavedStateHandle(mapOf(Routes.ARG_WALLET_ID to used)), t.wallets, t.transactions, t.categories)
+        val spareVm = WalletDetailViewModel(SavedStateHandle(mapOf(Routes.ARG_WALLET_ID to spare)), t.wallets, t.transactions, t.categories)
+        val showSpareState = androidx.compose.runtime.mutableStateOf(false)
+        compose.setContent {
+            FinTrackTheme {
+                if (showSpareState.value) WalletDetailScreen(onBack = { closed = true }, onEdit = {}, onOpenTransaction = {}, viewModel = spareVm)
+                else WalletDetailScreen(onBack = {}, onEdit = {}, onOpenTransaction = {}, viewModel = usedVm)
+            }
+        }
+
+        waitForText("Dompet ini diarsipkan dan tidak bisa dipilih untuk transaksi baru.")
+        compose.onNodeWithContentDescription("Pulihkan").performClick()
+        compose.waitUntil(5_000) {
+            compose.onAllNodesWithText("Dompet ini diarsipkan dan tidak bisa dipilih untuk transaksi baru.").fetchSemanticsNodes().isEmpty()
+        }
+        assertEquals(listOf(used), runBlocking { t.wallets.observeActiveWallets().first() }.filter { it.id == used }.map { it.id })
+
+        compose.onNodeWithContentDescription("Hapus").performClick()
+        waitForText("Hapus dompet?")
+        compose.onNodeWithText("Hapus").performClick()
+        waitForText("Dompet tidak bisa dihapus")
+        compose.onNodeWithText("Dompet ini masih dipakai oleh 1 transaksi (termasuk transfer). Agar riwayat keuangan tetap utuh, dompet dengan transaksi hanya bisa diarsipkan.").assertIsDisplayed()
+        compose.onNodeWithText("Batal").performClick()
+        assertTrue(runBlocking { t.wallets.getWallet(used) } != null)
+
+        showSpareState.value = true
+        waitForText("Salah buat")
+        compose.onNodeWithContentDescription("Hapus").performClick()
+        waitForText("Hapus dompet?")
+        compose.onNodeWithText("Hapus").performClick()
+        waitForCondition { closed }
+        assertEquals(null, runBlocking { t.wallets.getWallet(spare) })
     }
 }

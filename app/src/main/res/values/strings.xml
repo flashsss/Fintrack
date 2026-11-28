@@ -14,6 +14,8 @@
     <string name="action_cancel">Batal</string>
     <string name="action_edit">Ubah</string>
     <string name="action_delete">Hapus</string>
+    <string name="action_unarchive">Pulihkan</string>
+    <string name="action_close">Tutup</string>
     <string name="action_archive">Arsipkan</string>
     <string name="action_select">Pilih</string>
     <string name="action_apply">Terapkan</string>
@@ -271,6 +273,14 @@
     <string name="wallet_history_empty">Belum ada transaksi di dompet ini.</string>
     <string name="wallet_archive_title">Arsipkan dompet?</string>
     <string name="wallet_archive_message">Dompet yang diarsipkan tidak bisa dipilih untuk transaksi baru. Riwayat dan saldonya tetap tersimpan.</string>
+    <string name="wallet_delete_title">Hapus dompet?</string>
+    <string name="wallet_delete_message">Dompet tanpa transaksi ini akan dihapus beserta saldo awalnya. Tindakan ini tidak bisa dibatalkan dari aplikasi.</string>
+    <string name="wallet_delete_blocked">Dompet yang masih memiliki transaksi tidak bisa dihapus.</string>
+    <string name="wallet_delete_blocked_title">Dompet tidak bisa dihapus</string>
+    <plurals name="wallet_delete_blocked_message">
+        <item quantity="one">Dompet ini masih dipakai oleh %1$d transaksi (termasuk transfer). Agar riwayat keuangan tetap utuh, dompet dengan transaksi hanya bisa diarsipkan.</item>
+        <item quantity="other">Dompet ini masih dipakai oleh %1$d transaksi (termasuk transfer). Agar riwayat keuangan tetap utuh, dompet dengan transaksi hanya bisa diarsipkan.</item>
+    </plurals>
     <string name="wallet_archived_notice">Dompet ini diarsipkan dan tidak bisa dipilih untuk transaksi baru.</string>
 
     <!-- Categories -->
@@ -501,4 +511,5 @@
         <item quantity="one">%1$d data tidak dapat disinkronkan.</item>
         <item quantity="other">%1$d data tidak dapat disinkronkan.</item>
     </plurals>
+    <string name="category_unarchive_parent_archived">Pulihkan kategori induknya terlebih dahulu.</string>
 </resources>

@@ -114,6 +114,23 @@ class CategoryRepository @Inject constructor(
             WriteResult.Success(id)
         }
 
+    /**
+     * Makes an archived category selectable again. A subcategory can only be restored while its
+     * parent is active, so no active category sits under an archived one.
+     */
+    suspend fun unarchiveCategory(id: String): WriteResult<CategoryValidationError> =
+        database.withTransaction {
+            val existing = categoryDao.getById(id) ?: return@withTransaction WriteResult.NotFound
+            val parent = existing.parentId?.let { categoryDao.getById(it) }
+            if (existing.parentId != null && (parent == null || parent.isArchived)) {
+                return@withTransaction WriteResult.Invalid(listOf(CategoryValidationError.ParentArchived))
+            }
+            if (existing.isArchived) {
+                categoryDao.update(existing.copy(isArchived = false, updatedAt = clock.millis(), syncStatus = SyncStatus.PENDING))
+            }
+            WriteResult.Success(id)
+        }
+
     /** Idempotent: inserts only the default categories whose deterministic id does not exist yet. */
     suspend fun seedDefaultCategories() {
         val now = clock.millis()
