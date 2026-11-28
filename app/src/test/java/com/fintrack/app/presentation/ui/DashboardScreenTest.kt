@@ -164,8 +164,8 @@ class DashboardScreenTest {
         waitForText("Rp22.000.000")
         compose.onNode(hasScrollToIndexAction()).performScrollToNode(descriptionMatcher("Grafik batang harian"))
         val bars = compose.onNode(descriptionMatcher("Grafik batang harian")).captureToImage()
-        val income = if (dark) Color(0xFF4FD1C0) else Color(0xFF00796B)
-        val expense = if (dark) Color(0xFFF2937F) else Color(0xFFC0503E)
+        val income = if (dark) Color(0xFF5EE6C0) else Color(0xFF00796B)
+        val expense = if (dark) Color(0xFFFFB08A) else Color(0xFFC2551F)
         assertTrue("income bars drawn", bars.countPixels(income) > 20)
         assertTrue("expense bars drawn", bars.countPixels(expense) > 20)
 

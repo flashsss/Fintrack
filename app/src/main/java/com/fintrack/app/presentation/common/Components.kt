@@ -129,8 +129,9 @@ fun MoneyText(
     modifier: Modifier = Modifier,
     style: TextStyle = MaterialTheme.typography.bodyLarge,
     color: Color = Color.Unspecified,
+    maxLines: Int = Int.MAX_VALUE,
 ) {
-    Text(text = text, modifier = modifier, style = style.copy(fontFeatureSettings = "tnum"), color = color)
+    Text(text = text, modifier = modifier, style = style.copy(fontFeatureSettings = "tnum"), color = color, maxLines = maxLines)
 }
 
 @Composable
@@ -319,10 +320,14 @@ fun FormColumn(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
  */
 @Composable
 fun AddFab(label: String, onClick: () -> Unit) {
+    val fin = com.fintrack.app.core.ui.theme.LocalFinColors.current
     ExtendedFloatingActionButton(
         onClick = onClick,
         icon = { Icon(painterResource(R.drawable.ic_add), contentDescription = null) },
-        text = { Text(label) },
+        text = { Text(label, style = MaterialTheme.typography.labelLarge) },
+        containerColor = fin.fab,
+        contentColor = fin.onFab,
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp),
         modifier = Modifier.clearAndSetSemantics {
             contentDescription = label
             role = Role.Button

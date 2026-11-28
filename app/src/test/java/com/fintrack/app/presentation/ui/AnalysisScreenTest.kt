@@ -94,7 +94,7 @@ class AnalysisScreenTest {
         compose.onNodeWithText("1 Sep – 25 Nov 2026 · berjalan", substring = true).assertExists()
         val image = compose.onNode(chart).captureToImage()
         assertTrue("income bars", image.countPixels(Color(0xFF00796B)) > 20)
-        assertTrue("expense bars", image.countPixels(Color(0xFFC0503E)) > 20)
+        assertTrue("expense bars", image.countPixels(Color(0xFFC2551F)) > 20)
         compose.onNodeWithText("* Sebagian", substring = true).performScrollTo().assertExists()
         assertTrue(compose.onAllNodesWithText("Rp4.500.000").fetchSemanticsNodes().isNotEmpty()) // total expense
     }
@@ -105,8 +105,8 @@ class AnalysisScreenTest {
         show(dark = true)
         waitForText("Rp8.000.000")
         val image = compose.onNode(chart).captureToImage()
-        assertTrue(image.countPixels(Color(0xFF4FD1C0)) > 20)
-        assertTrue(image.countPixels(Color(0xFFF2937F)) > 20)
+        assertTrue(image.countPixels(Color(0xFF5EE6C0)) > 20)
+        assertTrue(image.countPixels(Color(0xFFFFB08A)) > 20)
     }
 
     @Test
