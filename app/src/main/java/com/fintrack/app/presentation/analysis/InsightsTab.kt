@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
@@ -15,7 +14,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.fintrack.app.R
+import com.fintrack.app.presentation.common.AppCard
 import com.fintrack.app.analytics.insights.Insight
 import com.fintrack.app.analytics.insights.Reason
 import com.fintrack.app.analytics.insights.RuleOutcome
@@ -31,37 +32,39 @@ import com.fintrack.app.presentation.common.categoryLabel
 internal fun InsightsTab(report: InsightReport) {
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(Spacing.screen),
-        verticalArrangement = Arrangement.spacedBy(Spacing.field),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        NoteText(
-            stringResource(
-                R.string.insights_intro,
-                JakartaTime.formatSpan(report.reported.first, report.reported.last),
-                JakartaTime.formatSpan(report.previous.first, report.previous.last),
-            ),
-        )
-        Text(stringResource(R.string.insights_found_title), style = MaterialTheme.typography.titleMedium)
-        val increases = (report.categoryIncreases as? RuleOutcome.Fired)?.value.orEmpty()
-        val drop = (report.savingRateDrop as? RuleOutcome.Fired)?.value
-        val weekend = (report.weekendSpending as? RuleOutcome.Fired)?.value
-        val merchant = (report.merchantConcentration as? RuleOutcome.Fired)?.value
-        if (increases.isEmpty() && drop == null && weekend == null && merchant == null) NoteText(stringResource(R.string.insights_none_found))
-        increases.forEach { insight -> CategoryIncreaseCard(insight, report) }
-        drop?.let { SavingRateDropCard(it) }
-        weekend?.let { WeekendCard(it) }
-        merchant?.let {
-            InsightCard(
-                text = stringResource(R.string.insight_i3_text, it.merchant, formatPercent(it.sharePercent), formatRupiah(it.total)),
-                basis = pluralStringResource(R.plurals.insight_i3_basis, it.count, formatRupiah(it.total), it.count),
+        AppCard {
+            NoteText(
+                stringResource(
+                    R.string.insights_intro,
+                    JakartaTime.formatSpan(report.reported.first, report.reported.last),
+                    JakartaTime.formatSpan(report.previous.first, report.previous.last),
+                ),
             )
+            Text(stringResource(R.string.insights_found_title), style = MaterialTheme.typography.titleMedium)
+            val increases = (report.categoryIncreases as? RuleOutcome.Fired)?.value.orEmpty()
+            val drop = (report.savingRateDrop as? RuleOutcome.Fired)?.value
+            val weekend = (report.weekendSpending as? RuleOutcome.Fired)?.value
+            val merchant = (report.merchantConcentration as? RuleOutcome.Fired)?.value
+            if (increases.isEmpty() && drop == null && weekend == null && merchant == null) NoteText(stringResource(R.string.insights_none_found))
+            increases.forEach { insight -> CategoryIncreaseCard(insight, report) }
+            drop?.let { SavingRateDropCard(it) }
+            weekend?.let { WeekendCard(it) }
+            merchant?.let {
+                InsightCard(
+                    text = stringResource(R.string.insight_i3_text, it.merchant, formatPercent(it.sharePercent), formatRupiah(it.total)),
+                    basis = pluralStringResource(R.plurals.insight_i3_basis, it.count, formatRupiah(it.total), it.count),
+                )
+            }
         }
-
-        HorizontalDivider()
-        Text(stringResource(R.string.insights_rules_title), style = MaterialTheme.typography.titleMedium)
-        RuleStatus(stringResource(R.string.insight_i1_rule), report.categoryIncreases)
-        RuleStatus(stringResource(R.string.insight_i5_rule), report.savingRateDrop)
-        RuleStatus(stringResource(R.string.insight_i2_rule), report.weekendSpending)
-        RuleStatus(stringResource(R.string.insight_i3_rule), report.merchantConcentration)
+        AppCard {
+            Text(stringResource(R.string.insights_rules_title), style = MaterialTheme.typography.titleMedium)
+            RuleStatus(stringResource(R.string.insight_i1_rule), report.categoryIncreases)
+            RuleStatus(stringResource(R.string.insight_i5_rule), report.savingRateDrop)
+            RuleStatus(stringResource(R.string.insight_i2_rule), report.weekendSpending)
+            RuleStatus(stringResource(R.string.insight_i3_rule), report.merchantConcentration)
+        }
     }
 }
 

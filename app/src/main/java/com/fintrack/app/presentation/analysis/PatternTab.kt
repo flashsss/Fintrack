@@ -8,14 +8,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.fintrack.app.R
+import com.fintrack.app.presentation.common.AppCard
 import com.fintrack.app.analytics.stats.DistributionSummary
 import com.fintrack.app.analytics.stats.Percentile
 import com.fintrack.app.core.util.formatRupiah
@@ -34,39 +35,41 @@ internal fun PatternTab(report: PatternReport) {
     val pattern = report.weekdays
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(Spacing.screen),
-        verticalArrangement = Arrangement.spacedBy(Spacing.small),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text(stringResource(R.string.pattern_weekday_title), style = MaterialTheme.typography.titleMedium)
         if (pattern.expenseCount == 0) {
-            NoteText(stringResource(R.string.pattern_empty))
+            AppCard { NoteText(stringResource(R.string.pattern_empty)) }
             return@Column
         }
-        val max = pattern.days.maxOf { it.dailyAverage ?: 0.0 }.takeIf { it > 0 } ?: 1.0
-        pattern.days.forEach { stat ->
-            val average = stat.dailyAverage ?: 0.0
-            Column(Modifier.fillMaxWidth()) {
-                Row(Modifier.fillMaxWidth()) {
-                    Text(stat.day.getDisplayName(TextStyle.FULL, INDONESIAN).replaceFirstChar { it.titlecase(INDONESIAN) }, Modifier.weight(1f))
-                    MoneyText(formatRupiah(stat.total), style = MaterialTheme.typography.bodyMedium)
+        AppCard {
+            Text(stringResource(R.string.pattern_weekday_title), style = MaterialTheme.typography.titleMedium)
+            val max = pattern.days.maxOf { it.dailyAverage ?: 0.0 }.takeIf { it > 0 } ?: 1.0
+            pattern.days.forEach { stat ->
+                val average = stat.dailyAverage ?: 0.0
+                Column(Modifier.fillMaxWidth()) {
+                    Row(Modifier.fillMaxWidth()) {
+                        Text(stat.day.getDisplayName(TextStyle.FULL, INDONESIAN).replaceFirstChar { it.titlecase(INDONESIAN) }, Modifier.weight(1f))
+                        MoneyText(formatRupiah(stat.total), style = MaterialTheme.typography.bodyMedium)
+                    }
+                    ProportionBar(average * 100 / max)
+                    NoteText(
+                        pluralStringResource(
+                            R.plurals.pattern_weekday_detail, stat.count,
+                            formatRupiah(average.roundToLong()), stat.count, stat.occurrences,
+                        ),
+                    )
                 }
-                ProportionBar(average * 100 / max)
-                NoteText(
-                    pluralStringResource(
-                        R.plurals.pattern_weekday_detail, stat.count,
-                        formatRupiah(average.roundToLong()), stat.count, stat.occurrences,
-                    ),
-                )
             }
+            NoteText(stringResource(R.string.pattern_weekday_note))
         }
-        NoteText(stringResource(R.string.pattern_weekday_note))
-
-        HorizontalDivider()
-        Text(stringResource(R.string.pattern_weekend_vs_weekday), style = MaterialTheme.typography.titleMedium)
-        DailyAverageRow(stringResource(R.string.pattern_weekend), pattern.weekendDailyAverage)
-        DailyAverageRow(stringResource(R.string.pattern_weekday), pattern.weekdayDailyAverage)
-
-        HorizontalDivider()
-        DistributionSection(report.distribution)
+        AppCard {
+            Text(stringResource(R.string.pattern_weekend_vs_weekday), style = MaterialTheme.typography.titleMedium)
+            DailyAverageRow(stringResource(R.string.pattern_weekend), pattern.weekendDailyAverage)
+            DailyAverageRow(stringResource(R.string.pattern_weekday), pattern.weekdayDailyAverage)
+        }
+        AppCard {
+            DistributionSection(report.distribution)
+        }
     }
 }
 

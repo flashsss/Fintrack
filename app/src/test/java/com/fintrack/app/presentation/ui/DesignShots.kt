@@ -20,6 +20,7 @@ import com.fintrack.app.domain.model.TransactionType
 import com.fintrack.app.domain.model.WalletType
 import com.fintrack.app.presentation.dashboard.DashboardScreen
 import com.fintrack.app.presentation.dashboard.DashboardViewModel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assume.assumeTrue
@@ -120,5 +121,56 @@ class DesignShots {
         shoot(if (dark) "beranda-gelap" else "beranda-terang", "Total saldo dompet aktif") {
             FinTrackTheme(darkTheme = dark) { DashboardScreen({}, {}, {}, viewModel = vm) }
         }
+    }
+
+    private fun seedPlanning() = runBlocking {
+        val food = t.categories.observeAllCategories().first().first { it.name == "Makanan" }.id
+        t.planning.createBudget(null, 8_000_000)
+        t.planning.createBudget(food, 600_000)
+        t.planning.createGoal("Dana darurat", 30_000_000, 7_500_000, null)
+    }
+
+    private val today get() = t.todayProvider(clock)
+
+    @Test fun transactionsLight() = transactions(false)
+    @Test fun transactionsDark() = transactions(true)
+    private fun transactions(dark: Boolean) {
+        seed()
+        val vm = com.fintrack.app.presentation.transactions.TransactionListViewModel(t.transactions, t.wallets, t.categories, today)
+        shoot("transaksi-" + if (dark) "gelap" else "terang", "Makan") {
+            FinTrackTheme(dark) { com.fintrack.app.presentation.transactions.TransactionListScreen({}, {}, viewModel = vm) }
+        }
+    }
+
+    @Test fun wallets() {
+        seed()
+        val vm = com.fintrack.app.presentation.wallets.WalletListViewModel(t.wallets)
+        shoot("dompet-terang", "GoPay") { FinTrackTheme(false) { com.fintrack.app.presentation.wallets.WalletListScreen({}, {}, viewModel = vm) } }
+    }
+
+    @Test fun walletDetail() {
+        seed()
+        val wallet = runBlocking { t.wallets.observeActiveWallets().first().first { it.name == "BCA" }.id }
+        val vm = com.fintrack.app.presentation.wallets.WalletDetailViewModel(
+            androidx.lifecycle.SavedStateHandle(mapOf(com.fintrack.app.presentation.navigation.Routes.ARG_WALLET_ID to wallet)), t.wallets, t.transactions, t.categories,
+        )
+        shoot("dompet-detail-gelap", "Riwayat transaksi") { FinTrackTheme(true) { com.fintrack.app.presentation.wallets.WalletDetailScreen({}, {}, {}, viewModel = vm) } }
+    }
+
+    @Test fun analysis() {
+        seed()
+        val vm = com.fintrack.app.presentation.analysis.AnalysisViewModel(t.reports, t.analytics, t.categories, today)
+        shoot("analisis-terang", "Wawasan") { FinTrackTheme(false) { com.fintrack.app.presentation.analysis.AnalysisScreen(viewModel = vm) } }
+    }
+
+    @Test fun planning() {
+        seed()
+        seedPlanning()
+        val vm = com.fintrack.app.presentation.planning.PlanningViewModel(t.planning, t.reports, t.categories, today)
+        shoot("perencanaan-terang", "Dana darurat") { FinTrackTheme(false) { com.fintrack.app.presentation.planning.PlanningScreen({}, {}, {}, {}, {}, viewModel = vm) } }
+    }
+
+    @Test fun settings() {
+        shoot("pengaturan-gelap", "Kategori") { FinTrackTheme(true) { com.fintrack.app.presentation.settings.SettingsScreen({}, {}, {}, {}) } }
     }
 }

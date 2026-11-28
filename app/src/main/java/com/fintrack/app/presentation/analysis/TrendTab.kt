@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -20,7 +19,9 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
 import com.fintrack.app.R
+import com.fintrack.app.presentation.common.AppCard
 import com.fintrack.app.analytics.trends.Granularity
 import com.fintrack.app.analytics.trends.TrendBucket
 import com.fintrack.app.analytics.trends.TrendReport
@@ -43,70 +44,72 @@ internal fun TrendTab(report: TrendReport, onGranularityChange: (Granularity) ->
     val totals = report.totals
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(Spacing.screen),
-        verticalArrangement = Arrangement.spacedBy(Spacing.field),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        GranularitySelector(report, onGranularityChange)
+        AppCard {
+            GranularitySelector(report, onGranularityChange)
 
-        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.field)) {
-            LegendItem(colors.income, stringResource(R.string.dashboard_income), formatRupiah(totals.income))
-            LegendItem(colors.expense, stringResource(R.string.dashboard_expense), formatRupiah(totals.expense))
+            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.field)) {
+                LegendItem(colors.income, stringResource(R.string.dashboard_income), formatRupiah(totals.income))
+                LegendItem(colors.expense, stringResource(R.string.dashboard_expense), formatRupiah(totals.expense))
+            }
+            if (totals.income == 0L && totals.expense == 0L) {
+                NoteText(stringResource(R.string.analysis_trend_empty))
+            } else {
+                val buckets = report.buckets
+                val description = stringResource(
+                    R.string.analysis_trend_chart_description,
+                    stringResource(report.granularity.labelRes).lowercase(),
+                    JakartaTime.formatSpan(report.reported.first, report.reported.last),
+                )
+                IncomeExpenseColumnChart(
+                    labels = buckets.map { it.label(report.granularity) },
+                    income = buckets.map { it.income },
+                    expense = buckets.map { it.expense },
+                    labelSpacing = if (buckets.size > 16) 5 else 1,
+                    modifier = Modifier.semantics { contentDescription = description },
+                )
+                if (buckets.any { it.isPartial }) NoteText(stringResource(R.string.analysis_partial_note))
+            }
         }
-        if (totals.income == 0L && totals.expense == 0L) {
-            NoteText(stringResource(R.string.analysis_trend_empty))
-        } else {
-            val buckets = report.buckets
-            val description = stringResource(
-                R.string.analysis_trend_chart_description,
-                stringResource(report.granularity.labelRes).lowercase(),
-                JakartaTime.formatSpan(report.reported.first, report.reported.last),
-            )
-            IncomeExpenseColumnChart(
-                labels = buckets.map { it.label(report.granularity) },
-                income = buckets.map { it.income },
-                expense = buckets.map { it.expense },
-                labelSpacing = if (buckets.size > 16) 5 else 1,
-                modifier = Modifier.semantics { contentDescription = description },
-            )
-            if (buckets.any { it.isPartial }) NoteText(stringResource(R.string.analysis_partial_note))
-        }
-
-        HorizontalDivider()
-        Metric(stringResource(R.string.dashboard_net_cash_flow), formatRupiahSigned(totals.netCashFlow))
-        Metric(
-            stringResource(R.string.dashboard_saving_rate),
-            totals.savingRatePercent?.let { formatPercent(it) } ?: stringResource(R.string.dashboard_saving_rate_unavailable),
-        )
-        Metric(
-            stringResource(R.string.analysis_average_daily_expense),
-            report.averageDailyExpense?.let { formatRupiah(it.roundToLong()) } ?: "—",
-        )
-        NoteText(stringResource(R.string.analysis_average_daily_note))
-        if (report.granularity != Granularity.DAILY) {
+        AppCard {
+            Metric(stringResource(R.string.dashboard_net_cash_flow), formatRupiahSigned(totals.netCashFlow))
             Metric(
-                stringResource(if (report.granularity == Granularity.WEEKLY) R.string.analysis_average_full_week else R.string.analysis_average_full_month),
-                report.averageFullBucketExpense?.let { formatRupiah(it.roundToLong()) }
-                    ?: stringResource(R.string.analysis_average_full_unavailable),
+                stringResource(R.string.dashboard_saving_rate),
+                totals.savingRatePercent?.let { formatPercent(it) } ?: stringResource(R.string.dashboard_saving_rate_unavailable),
+            )
+            Metric(
+                stringResource(R.string.analysis_average_daily_expense),
+                report.averageDailyExpense?.let { formatRupiah(it.roundToLong()) } ?: "—",
+            )
+            NoteText(stringResource(R.string.analysis_average_daily_note))
+            if (report.granularity != Granularity.DAILY) {
+                Metric(
+                    stringResource(if (report.granularity == Granularity.WEEKLY) R.string.analysis_average_full_week else R.string.analysis_average_full_month),
+                    report.averageFullBucketExpense?.let { formatRupiah(it.roundToLong()) }
+                        ?: stringResource(R.string.analysis_average_full_unavailable),
+                )
+            }
+        }
+        AppCard {
+            Text(stringResource(R.string.analysis_comparison_title), style = MaterialTheme.typography.titleMedium)
+            Text(
+                stringResource(
+                    R.string.dashboard_comparison_spans,
+                    JakartaTime.formatSpan(report.reported.first, report.reported.last),
+                    JakartaTime.formatSpan(report.previous.first, report.previous.last),
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            ComparisonRow(stringResource(R.string.dashboard_income), report.income)
+            ComparisonRow(stringResource(R.string.dashboard_expense), report.expense)
+            ComparisonRow(stringResource(R.string.dashboard_net_cash_flow), report.netCashFlow)
+            Metric(
+                stringResource(R.string.analysis_saving_rate_change),
+                report.savingRatePointChange?.let { stringResource(R.string.analysis_points, formatPercent(it, signed = true).removeSuffix("%")) }
+                    ?: stringResource(R.string.analysis_saving_rate_change_unavailable),
             )
         }
-
-        HorizontalDivider()
-        Text(stringResource(R.string.analysis_comparison_title), style = MaterialTheme.typography.titleMedium)
-        Text(
-            stringResource(
-                R.string.dashboard_comparison_spans,
-                JakartaTime.formatSpan(report.reported.first, report.reported.last),
-                JakartaTime.formatSpan(report.previous.first, report.previous.last),
-            ),
-            style = MaterialTheme.typography.bodyMedium,
-        )
-        ComparisonRow(stringResource(R.string.dashboard_income), report.income)
-        ComparisonRow(stringResource(R.string.dashboard_expense), report.expense)
-        ComparisonRow(stringResource(R.string.dashboard_net_cash_flow), report.netCashFlow)
-        Metric(
-            stringResource(R.string.analysis_saving_rate_change),
-            report.savingRatePointChange?.let { stringResource(R.string.analysis_points, formatPercent(it, signed = true).removeSuffix("%")) }
-                ?: stringResource(R.string.analysis_saving_rate_change_unavailable),
-        )
     }
 }
 

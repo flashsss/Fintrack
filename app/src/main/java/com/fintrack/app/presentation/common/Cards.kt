@@ -204,3 +204,32 @@ fun ScreenHeader(title: String, modifier: Modifier = Modifier, actions: @Composa
         actions()
     }
 }
+
+/** Round filter chip in the pill colors (selected = primary), for rows with more options than fit in pills. */
+@Composable
+fun PillChip(
+    selected: Boolean,
+    onClick: () -> Unit,
+    label: String,
+    modifier: Modifier = Modifier,
+    leadingIcon: (@Composable () -> Unit)? = null,
+) {
+    val scheme = MaterialTheme.colorScheme
+    androidx.compose.material3.FilterChip(
+        selected = selected,
+        onClick = onClick,
+        label = { Text(label, style = MaterialTheme.typography.labelLarge) },
+        leadingIcon = leadingIcon,
+        shape = CircleShape,
+        modifier = modifier.heightIn(min = 40.dp),
+        border = null,
+        colors = androidx.compose.material3.FilterChipDefaults.filterChipColors(
+            containerColor = scheme.primaryContainer,
+            labelColor = scheme.onPrimaryContainer,
+            iconColor = scheme.onPrimaryContainer,
+            selectedContainerColor = scheme.primary,
+            selectedLabelColor = scheme.onPrimary,
+            selectedLeadingIconColor = scheme.onPrimary,
+        ),
+    )
+}

@@ -10,9 +10,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -31,7 +31,8 @@ import com.fintrack.app.R
 import com.fintrack.app.core.util.JakartaTime
 import com.fintrack.app.presentation.common.AddFab
 import com.fintrack.app.presentation.common.DateRangePickerDialog
-import com.fintrack.app.presentation.common.FinTopBar
+import com.fintrack.app.presentation.common.PillChip
+import com.fintrack.app.presentation.common.ScreenHeader
 import com.fintrack.app.presentation.common.LoadingState
 import com.fintrack.app.presentation.common.MessageState
 import com.fintrack.app.presentation.common.Spacing
@@ -46,7 +47,7 @@ fun TransactionListScreen(
     val query by viewModel.query.collectAsStateWithLifecycle()
 
     Scaffold(
-        topBar = { FinTopBar(stringResource(R.string.transactions_title)) },
+        topBar = { ScreenHeader(stringResource(R.string.transactions_title)) },
         floatingActionButton = {
             AddFab(stringResource(R.string.transactions_add), onClick = onAddTransaction)
         },
@@ -80,6 +81,12 @@ private fun SearchField(query: String, onQueryChange: (String) -> Unit) {
         value = query,
         onValueChange = onQueryChange,
         modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.screen),
+        shape = androidx.compose.foundation.shape.CircleShape,
+        colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+            unfocusedContainerColor = com.fintrack.app.core.ui.theme.LocalFinColors.current.card,
+            focusedContainerColor = com.fintrack.app.core.ui.theme.LocalFinColors.current.card,
+            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+        ),
         placeholder = { Text(stringResource(R.string.transactions_search)) },
         leadingIcon = { Icon(painterResource(R.drawable.ic_search), contentDescription = null) },
         trailingIcon = {
@@ -104,37 +111,33 @@ private fun PeriodChips(period: PeriodFilter, onPeriodChange: (PeriodFilter) -> 
             .padding(horizontal = Spacing.screen, vertical = Spacing.small),
         horizontalArrangement = Arrangement.spacedBy(Spacing.small),
     ) {
-        FilterChip(
+        PillChip(
             selected = period == PeriodFilter.All,
             onClick = { onPeriodChange(PeriodFilter.All) },
-            label = { Text(stringResource(R.string.period_all)) },
+            label = stringResource(R.string.period_all),
         )
-        FilterChip(
+        PillChip(
             selected = period == PeriodFilter.ThisMonth,
             onClick = { onPeriodChange(PeriodFilter.ThisMonth) },
-            label = { Text(stringResource(R.string.period_this_month)) },
+            label = stringResource(R.string.period_this_month),
         )
-        FilterChip(
+        PillChip(
             selected = period == PeriodFilter.LastMonth,
             onClick = { onPeriodChange(PeriodFilter.LastMonth) },
-            label = { Text(stringResource(R.string.period_last_month)) },
+            label = stringResource(R.string.period_last_month),
         )
-        FilterChip(
+        PillChip(
             selected = period is PeriodFilter.Custom,
             onClick = { showRangePicker = true },
             leadingIcon = { Icon(painterResource(R.drawable.ic_calendar_month), contentDescription = null) },
-            label = {
-                Text(
-                    if (period is PeriodFilter.Custom) {
-                        stringResource(
-                            R.string.period_custom_range,
-                            JakartaTime.formatDate(period.first),
-                            JakartaTime.formatDate(period.last),
-                        )
-                    } else {
-                        stringResource(R.string.period_custom)
-                    },
+            label = if (period is PeriodFilter.Custom) {
+                stringResource(
+                    R.string.period_custom_range,
+                    JakartaTime.formatDate(period.first),
+                    JakartaTime.formatDate(period.last),
                 )
+            } else {
+                stringResource(R.string.period_custom)
             },
         )
     }

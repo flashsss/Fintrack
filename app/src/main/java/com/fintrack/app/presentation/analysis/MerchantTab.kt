@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -22,7 +21,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.fintrack.app.R
+import com.fintrack.app.presentation.common.AppCard
 import com.fintrack.app.analytics.insights.InsightRules
 import com.fintrack.app.analytics.metrics.MerchantStats
 import com.fintrack.app.core.util.JakartaTime
@@ -43,62 +44,64 @@ internal fun MerchantTab(report: MerchantReport) {
     val summary = report.summary
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(Spacing.screen),
-        verticalArrangement = Arrangement.spacedBy(Spacing.small),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         val coverage = summary.coveragePercent
         if (coverage == null || summary.merchants.isEmpty()) {
-            NoteText(stringResource(R.string.merchant_empty))
+            AppCard { NoteText(stringResource(R.string.merchant_empty)) }
             return@Column
         }
-        NoteText(
-            stringResource(
-                if (coverage < InsightRules.I3_MIN_COVERAGE) R.string.merchant_coverage_low else R.string.merchant_coverage,
-                formatPercent(coverage),
-            ),
-        )
-        val options = listOf(false, true)
-        SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-            options.forEachIndexed { index, option ->
-                SegmentedButton(
-                    selected = byCount == option,
-                    onClick = { byCount = option },
-                    shape = SegmentedButtonDefaults.itemShape(index, options.size),
-                ) { Text(stringResource(if (option) R.string.merchant_rank_by_count else R.string.merchant_rank_by_total)) }
+        AppCard {
+            NoteText(
+                stringResource(
+                    if (coverage < InsightRules.I3_MIN_COVERAGE) R.string.merchant_coverage_low else R.string.merchant_coverage,
+                    formatPercent(coverage),
+                ),
+            )
+            val options = listOf(false, true)
+            SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                options.forEachIndexed { index, option ->
+                    SegmentedButton(
+                        selected = byCount == option,
+                        onClick = { byCount = option },
+                        shape = SegmentedButtonDefaults.itemShape(index, options.size),
+                    ) { Text(stringResource(if (option) R.string.merchant_rank_by_count else R.string.merchant_rank_by_total)) }
+                }
             }
-        }
-        // Ordering only; every value shown was computed in the analytics layer.
-        val ranked = if (byCount) summary.merchants.sortedWith(compareByDescending<MerchantStats> { it.count }.thenBy { it.key.value }) else summary.merchants
-        ranked.take(RANKING_SIZE).forEach { stats -> MerchantRow(stats, summary.share(stats) ?: 0.0) }
-        if (summary.withoutMerchant > 0) {
-            Row(Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.merchant_without), Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
-                MoneyText(formatRupiah(summary.withoutMerchant), style = MaterialTheme.typography.bodyMedium)
+            // Ordering only; every value shown was computed in the analytics layer.
+            val ranked = if (byCount) summary.merchants.sortedWith(compareByDescending<MerchantStats> { it.count }.thenBy { it.key.value }) else summary.merchants
+            ranked.take(RANKING_SIZE).forEach { stats -> MerchantRow(stats, summary.share(stats) ?: 0.0) }
+            if (summary.withoutMerchant > 0) {
+                Row(Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.merchant_without), Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+                    MoneyText(formatRupiah(summary.withoutMerchant), style = MaterialTheme.typography.bodyMedium)
+                }
             }
+            NoteText(stringResource(R.string.merchant_normalization_note))
         }
-        NoteText(stringResource(R.string.merchant_normalization_note))
-
-        HorizontalDivider()
-        Text(stringResource(R.string.merchant_new_title), style = MaterialTheme.typography.titleMedium)
-        if (report.newMerchants.isEmpty()) NoteText(stringResource(R.string.merchant_new_empty))
-        report.newMerchants.take(RANKING_SIZE).forEach { MerchantRow(it, summary.share(it) ?: 0.0) }
-
-        HorizontalDivider()
-        Text(
-            stringResource(R.string.merchant_changes_title, JakartaTime.formatSpan(report.previous.first, report.previous.last)),
-            style = MaterialTheme.typography.titleMedium,
-        )
-        if (report.changes.isEmpty()) NoteText(stringResource(R.string.merchant_changes_empty))
-        report.changes.take(5).forEach { change ->
-            Row(Modifier.fillMaxWidth()) {
-                Text(change.displayName, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
-                MoneyText(
-                    pluralStringResource(
-                        R.plurals.merchant_count_change, kotlin.math.abs(change.countChange),
-                        formatRupiahSigned(change.totalChange),
-                        if (change.countChange > 0) "+${change.countChange}" else change.countChange.toString(),
-                    ),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
+        AppCard {
+            Text(stringResource(R.string.merchant_new_title), style = MaterialTheme.typography.titleMedium)
+            if (report.newMerchants.isEmpty()) NoteText(stringResource(R.string.merchant_new_empty))
+            report.newMerchants.take(RANKING_SIZE).forEach { MerchantRow(it, summary.share(it) ?: 0.0) }
+        }
+        AppCard {
+            Text(
+                stringResource(R.string.merchant_changes_title, JakartaTime.formatSpan(report.previous.first, report.previous.last)),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            if (report.changes.isEmpty()) NoteText(stringResource(R.string.merchant_changes_empty))
+            report.changes.take(5).forEach { change ->
+                Row(Modifier.fillMaxWidth()) {
+                    Text(change.displayName, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+                    MoneyText(
+                        pluralStringResource(
+                            R.plurals.merchant_count_change, kotlin.math.abs(change.countChange),
+                            formatRupiahSigned(change.totalChange),
+                            if (change.countChange > 0) "+${change.countChange}" else change.countChange.toString(),
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
             }
         }
     }

@@ -359,6 +359,13 @@ Design and decisions: `docs/PHASE_6_TECHNICAL_DESIGN.md`. Server schema:
 - Strings live in `res/values/strings.xml` (Bahasa Indonesia). Icons are Material Symbols vector
   drawables (the Compose material-icons artifacts are no longer updated).
 - Beranda is the dashboard and the start destination; Analisis is the Phase 4 analytics tab.
+- Visual design (Phase 8.4): light theme "Tenang" (soft neutral ground, white cards, teal) and dark
+  theme "Gelap premium" (green-black ground, mint accent), Plus Jakarta Sans bundled (OFL). Shared
+  pieces in `presentation/common/Cards.kt`: `ScreenHeader` for top-level tabs, `AppCard`,
+  `StatTile` (tinted income/expense), `PeriodPills` / `PillChip`, `LetterChip` / `TransferChip`,
+  `ProgressBar`. Colors beyond Material roles live in `FinColors` (`LocalFinColors`); every text
+  pair is ≥ 4.5:1 and chart colors ≥ 3:1 in both themes. `DesignShots` renders screens to PNG for
+  review when `FINTRACK_SHOTS` names an output folder.
 - Charts use Vico 3.3.1 (column chart for daily values, donut for categories), drawn
   statically without animation; chart colors come from `LocalChartColors` (light and dark).
 - Database read failures surface as error states; write failures (`SQLException`) as a form

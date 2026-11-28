@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryScrollableTabRow
@@ -26,12 +25,14 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.unit.dp
 import com.fintrack.app.R
 import com.fintrack.app.analytics.period.AnalysisPeriod
 import com.fintrack.app.analytics.period.ResolvedPeriod
 import com.fintrack.app.core.util.JakartaTime
 import com.fintrack.app.presentation.common.DateRangePickerDialog
-import com.fintrack.app.presentation.common.FinTopBar
+import com.fintrack.app.presentation.common.PillChip
+import com.fintrack.app.presentation.common.ScreenHeader
 import com.fintrack.app.presentation.common.LoadingState
 import com.fintrack.app.presentation.common.MessageState
 import com.fintrack.app.presentation.common.Spacing
@@ -42,11 +43,15 @@ fun AnalysisScreen(viewModel: AnalysisViewModel = hiltViewModel()) {
     val selectedPeriod by viewModel.selectedPeriod.collectAsStateWithLifecycle()
     val selectedTab by viewModel.selectedTab.collectAsStateWithLifecycle()
 
-    Scaffold(topBar = { FinTopBar(stringResource(R.string.analysis_title)) }) { padding ->
+    Scaffold(topBar = { ScreenHeader(stringResource(R.string.analysis_title)) }) { padding ->
         Column(Modifier.padding(padding).fillMaxSize()) {
             AnalysisPeriodSelector(selectedPeriod, state.resolved, viewModel::onPeriodChange)
             if (AnalysisTab.entries.size > 1) {
-                PrimaryScrollableTabRow(selectedTabIndex = selectedTab.ordinal) {
+                PrimaryScrollableTabRow(
+                    selectedTabIndex = selectedTab.ordinal,
+                    containerColor = MaterialTheme.colorScheme.background,
+                    edgePadding = Spacing.screen,
+                ) {
                     AnalysisTab.entries.forEach { tab ->
                         Tab(selected = tab == selectedTab, onClick = { viewModel.onTabChange(tab) }, text = { Text(stringResource(tab.labelRes)) })
                     }
@@ -86,20 +91,20 @@ private fun AnalysisPeriodSelector(selected: AnalysisPeriod, resolved: ResolvedP
         modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = Spacing.screen),
         horizontalArrangement = Arrangement.spacedBy(Spacing.small),
     ) {
-        FilterChip(selected == AnalysisPeriod.ThisMonth, { onChange(AnalysisPeriod.ThisMonth) }, { Text(stringResource(R.string.period_this_month)) })
-        FilterChip(selected == AnalysisPeriod.LastMonth, { onChange(AnalysisPeriod.LastMonth) }, { Text(stringResource(R.string.period_last_month)) })
+        PillChip(selected == AnalysisPeriod.ThisMonth, { onChange(AnalysisPeriod.ThisMonth) }, stringResource(R.string.period_this_month))
+        PillChip(selected == AnalysisPeriod.LastMonth, { onChange(AnalysisPeriod.LastMonth) }, stringResource(R.string.period_last_month))
         AnalysisPeriod.ALLOWED_MONTHS.sorted().forEach { months ->
-            FilterChip(
+            PillChip(
                 selected = selected == AnalysisPeriod.LastMonths(months),
                 onClick = { onChange(AnalysisPeriod.LastMonths(months)) },
-                label = { Text(pluralStringResource(R.plurals.analysis_period_months, months, months)) },
+                label = pluralStringResource(R.plurals.analysis_period_months, months, months),
             )
         }
-        FilterChip(
+        PillChip(
             selected = selected is AnalysisPeriod.Custom,
             onClick = { showPicker = true },
             leadingIcon = { Icon(painterResource(R.drawable.ic_calendar_month), contentDescription = null) },
-            label = { Text(stringResource(R.string.period_custom)) },
+            label = stringResource(R.string.period_custom),
         )
     }
     if (resolved != null) {
@@ -110,7 +115,12 @@ private fun AnalysisPeriodSelector(selected: AnalysisPeriod, resolved: ResolvedP
             val span = JakartaTime.formatSpan(resolved.first, last)
             if (resolved.isPartial) stringResource(R.string.dashboard_period_in_progress, span) else span
         }
-        Text(label, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = Spacing.screen, vertical = Spacing.small))
+        Text(
+            label,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = Spacing.screen + 4.dp, vertical = Spacing.small),
+        )
     }
     if (showPicker) {
         DateRangePickerDialog(

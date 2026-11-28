@@ -282,6 +282,7 @@
         <item quantity="one">Dompet ini masih dipakai oleh %1$d transaksi (termasuk transfer). Agar riwayat keuangan tetap utuh, dompet dengan transaksi hanya bisa diarsipkan.</item>
         <item quantity="other">Dompet ini masih dipakai oleh %1$d transaksi (termasuk transfer). Agar riwayat keuangan tetap utuh, dompet dengan transaksi hanya bisa diarsipkan.</item>
     </plurals>
+    <string name="wallet_balance_negative">Saldo minus</string>
     <string name="wallet_archived_notice">Dompet ini diarsipkan dan tidak bisa dipilih untuk transaksi baru.</string>
 
     <!-- Categories -->

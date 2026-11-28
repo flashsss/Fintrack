@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -31,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.fintrack.app.R
+import com.fintrack.app.presentation.common.AppCard
 import com.fintrack.app.analytics.metrics.CategoryAnalysis
 import com.fintrack.app.analytics.metrics.CategoryChange
 import com.fintrack.app.core.ui.theme.LocalChartColors
@@ -50,79 +50,79 @@ internal fun CategoryTab(report: CategoryReport, onSelect: (String) -> Unit) {
     var byParent by rememberSaveable { mutableStateOf(false) }
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(Spacing.screen),
-        verticalArrangement = Arrangement.spacedBy(Spacing.small),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         if (report.totalExpense == 0L) {
-            NoteText(stringResource(R.string.analysis_category_empty))
+            AppCard { NoteText(stringResource(R.string.analysis_category_empty)) }
             return@Column
         }
-        val views = listOf(false, true)
-        SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-            views.forEachIndexed { index, parentView ->
-                SegmentedButton(
-                    selected = byParent == parentView,
-                    onClick = { byParent = parentView },
-                    shape = SegmentedButtonDefaults.itemShape(index, views.size),
-                ) { Text(stringResource(if (parentView) R.string.analysis_category_view_parent else R.string.analysis_category_view_flat)) }
-            }
-        }
-        Text(stringResource(R.string.analysis_category_total), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        MoneyText(formatRupiah(report.totalExpense), style = MaterialTheme.typography.titleLarge)
-        NoteText(
-            stringResource(
-                R.string.analysis_category_vs_previous,
-                JakartaTime.formatSpan(report.reported.first, report.reported.last),
-                JakartaTime.formatSpan(report.previous.first, report.previous.last),
-            ) + ". " + stringResource(R.string.analysis_category_tap_hint),
-        )
-
         val byId = report.categoriesById
-        if (byParent) {
-            report.parents.forEach { node ->
-                val category = byId.getValue(node.categoryId)
-                val childrenTotal = node.rolledUp - node.direct
-                CategoryRow(
-                    label = category.name,
-                    isArchived = category.isArchived,
-                    amount = node.rolledUp,
-                    total = report.totalExpense,
-                    change = CategoryChange(node.categoryId, node.rolledUp, report.previousByParent[node.categoryId] ?: 0L),
-                    note = if (childrenTotal > 0) stringResource(R.string.analysis_category_includes_children, formatRupiah(childrenTotal)) else null,
-                    selected = report.selectedCategoryId == node.categoryId,
-                    onClick = { onSelect(node.categoryId) },
-                )
+        AppCard {
+            val views = listOf(false, true)
+            SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                views.forEachIndexed { index, parentView ->
+                    SegmentedButton(
+                        selected = byParent == parentView,
+                        onClick = { byParent = parentView },
+                        shape = SegmentedButtonDefaults.itemShape(index, views.size),
+                    ) { Text(stringResource(if (parentView) R.string.analysis_category_view_parent else R.string.analysis_category_view_flat)) }
+                }
             }
-        } else {
-            report.flat.filter { it.categoryId in byId }.forEach { item ->
-                val category = byId.getValue(item.categoryId)
-                CategoryRow(
-                    label = categoryLabel(category, byId),
-                    isArchived = category.isArchived,
-                    amount = item.total,
-                    total = report.totalExpense,
-                    change = CategoryChange(item.categoryId, item.total, report.previousById[item.categoryId] ?: 0L),
-                    note = null,
-                    selected = report.selectedCategoryId == item.categoryId,
-                    onClick = { onSelect(item.categoryId) },
-                )
-            }
-        }
-        // Outside the hierarchy (addendum B4): never merged into a parent.
-        if (report.outside.uncategorized > 0) {
-            CategoryRow(stringResource(R.string.dashboard_breakdown_uncategorized), false, report.outside.uncategorized, report.totalExpense, null, null, false, null)
-        }
-        report.outside.unknown.forEach {
-            CategoryRow(stringResource(R.string.analysis_category_unknown), false, it.total, report.totalExpense, null, null, false, null)
-        }
-        NoteText(stringResource(R.string.analysis_category_percent_note))
+            Text(stringResource(R.string.analysis_category_total), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            MoneyText(formatRupiah(report.totalExpense), style = MaterialTheme.typography.titleLarge)
+            NoteText(
+                stringResource(
+                    R.string.analysis_category_vs_previous,
+                    JakartaTime.formatSpan(report.reported.first, report.reported.last),
+                    JakartaTime.formatSpan(report.previous.first, report.previous.last),
+                ) + ". " + stringResource(R.string.analysis_category_tap_hint),
+            )
 
+            if (byParent) {
+                report.parents.forEach { node ->
+                    val category = byId.getValue(node.categoryId)
+                    val childrenTotal = node.rolledUp - node.direct
+                    CategoryRow(
+                        label = category.name,
+                        isArchived = category.isArchived,
+                        amount = node.rolledUp,
+                        total = report.totalExpense,
+                        change = CategoryChange(node.categoryId, node.rolledUp, report.previousByParent[node.categoryId] ?: 0L),
+                        note = if (childrenTotal > 0) stringResource(R.string.analysis_category_includes_children, formatRupiah(childrenTotal)) else null,
+                        selected = report.selectedCategoryId == node.categoryId,
+                        onClick = { onSelect(node.categoryId) },
+                    )
+                }
+            } else {
+                report.flat.filter { it.categoryId in byId }.forEach { item ->
+                    val category = byId.getValue(item.categoryId)
+                    CategoryRow(
+                        label = categoryLabel(category, byId),
+                        isArchived = category.isArchived,
+                        amount = item.total,
+                        total = report.totalExpense,
+                        change = CategoryChange(item.categoryId, item.total, report.previousById[item.categoryId] ?: 0L),
+                        note = null,
+                        selected = report.selectedCategoryId == item.categoryId,
+                        onClick = { onSelect(item.categoryId) },
+                    )
+                }
+            }
+            // Outside the hierarchy (addendum B4): never merged into a parent.
+            if (report.outside.uncategorized > 0) {
+                CategoryRow(stringResource(R.string.dashboard_breakdown_uncategorized), false, report.outside.uncategorized, report.totalExpense, null, null, false, null)
+            }
+            report.outside.unknown.forEach {
+                CategoryRow(stringResource(R.string.analysis_category_unknown), false, it.total, report.totalExpense, null, null, false, null)
+            }
+            NoteText(stringResource(R.string.analysis_category_percent_note))
+        }
         if (report.selectedCategoryId != null && report.selectedCategoryId in byId) {
-            HorizontalDivider()
-            MonthlyTrend(report)
+            AppCard { MonthlyTrend(report) }
         }
-
-        HorizontalDivider()
-        Movers(report)
+        AppCard {
+            Movers(report)
+        }
     }
 }
 
